@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(false);
           } else {
             // Store tokens in AsyncStorage
-            const accessToken = session.getAccessToken().getJwtToken();
+            const accessToken = session.getIdToken().getJwtToken();
             const refreshToken = session.getRefreshToken().getToken();
 
             await AsyncStorage.setItem('@accessToken', accessToken);
@@ -96,7 +96,7 @@ export const AuthProvider = ({ children }) => {
           console.log('Login successful:', result);
           const userData = {
             email: email,
-            accessToken: result.getAccessToken().getJwtToken(),
+            accessToken: result.getIdToken().getJwtToken(),
             refreshToken: result.getRefreshToken().getToken(),
           };
 
@@ -169,6 +169,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(false);
     } catch (error) {
       console.error('Logout error:', error);
+      throw error;
     }
   };
 

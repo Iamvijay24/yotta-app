@@ -99,7 +99,7 @@ const DashboardScreen = ({ navigation }) => {
     setRefreshing(true);
     try {
       // TODO: Fetch updated courses from API
-      // await DashboardAPI.getAllCourses();
+      await DashboardAPI.getAllCourses();
       setTimeout(() => {
         setRefreshing(false);
       }, 1000);

@@ -7,11 +7,14 @@ import {
   StatusBar,
   Alert,
   Image,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../shared/api/AuthContext';
 
 const AccountScreen = () => {
+  const navigation = useNavigation();
   const { user, logout } = useAuth();
 
   const handleLogout = () => {
@@ -22,7 +25,7 @@ const AccountScreen = () => {
         style: 'destructive',
         onPress: async () => {
           try {
-            await logout();
+            await logout(navigation);
           } catch (error) {
             Alert.alert('Error', 'Failed to logout');
           }
@@ -80,44 +83,51 @@ const AccountScreen = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Account</Text>
-      </View>
+      <ScrollView
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Account</Text>
+        </View>
 
-      {/* User Profile Section */}
-      <View style={styles.profileSection}>
-        <View style={styles.profileCard}>
-          <Image
-            source={{
-              uri:
-                'https://via.placeholder.com/80x80/2575fc/ffffff?text=' +
-                encodeURIComponent(user?.name?.charAt(0).toUpperCase() || 'U'),
-            }}
-            style={styles.avatar}
-          />
-          <View style={styles.userDetails}>
-            <Text style={styles.userName}>{user?.name || 'User'}</Text>
-            <Text style={styles.userEmail}>
-              {user?.email || 'user@example.com'}
-            </Text>
+        {/* User Profile Section */}
+        <View style={styles.profileSection}>
+          <View style={styles.profileCard}>
+            <Image
+              source={{
+                uri:
+                  'https://via.placeholder.com/80x80/2575fc/ffffff?text=' +
+                  encodeURIComponent(
+                    user?.name?.charAt(0).toUpperCase() || 'U',
+                  ),
+              }}
+              style={styles.avatar}
+            />
+            <View style={styles.userDetails}>
+              <Text style={styles.userName}>{user?.name || 'User'}</Text>
+              <Text style={styles.userEmail}>
+                {user?.email || 'user@example.com'}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
 
-      {/* Menu Items */}
-      <View style={styles.menuSection}>
-        {menuItems.map(item => (
-          <View key={item.id}>{renderMenuItem({ item })}</View>
-        ))}
-      </View>
+        {/* Menu Items */}
+        <View style={styles.menuSection}>
+          {menuItems.map(item => (
+            <View key={item.id}>{renderMenuItem({ item })}</View>
+          ))}
+        </View>
 
-      {/* Logout Button */}
-      <View style={styles.logoutSection}>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Logout Button */}
+        <View style={styles.logoutSection}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -126,6 +136,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f7fa',
+  },
+  scrollContainer: {
+    flex: 1,
   },
   header: {
     backgroundColor: '#2575fc',

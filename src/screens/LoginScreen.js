@@ -8,18 +8,46 @@ import {
   Alert,
   ScrollView,
   Image,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import LinearGradient from 'react-native-linear-gradient';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../shared/api/AuthContext';
+import Logo from '../assets/Logo_main.png';
+
+// Custom Input component that mimics Ant Design's prefix prop
+const Input = ({ prefix, suffix, style, ...props }) => (
+  <View style={[styles.inputContainer, style]}>
+    {prefix && <View style={styles.inputPrefix}>{prefix}</View>}
+    <TextInput
+      style={[styles.inputWithIcon, suffix && styles.inputWithSuffix]}
+      {...props}
+    />
+    {suffix && <View style={styles.inputSuffix}>{suffix}</View>}
+  </View>
+);
 
 const LoginScreen = ({ navigation }) => {
-  const { login, register, forgotPassword } = useAuth();
+  const {
+    login,
+    register,
+    forgotPassword,
+    resetPassword,
+    verifyEmail,
+    resendVerificationCode,
+  } = useAuth();
   const [mode, setMode] = useState('login'); // login, signup, forgot
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [forgotPasswordStep, setForgotPasswordStep] = useState(1);
+  const [resetCode, setResetCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -64,13 +92,8 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const handleSignup = async () => {
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name || !email || !password) {
       Alert.alert('Error', 'Please fill all fields');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
@@ -79,16 +102,16 @@ const LoginScreen = ({ navigation }) => {
       await register(email, password, name);
       Alert.alert(
         'Success',
-        'Account created successfully. Please check your email for verification.',
+        'Account created successfully. Please check your email for verification code.',
       );
-      setMode('login');
+      setShowOtpModal(true);
     } catch (error) {
       Alert.alert('Error', error.message || 'Signup failed');
     }
     setLoading(false);
   };
 
-  const handleForgotPassword = async () => {
+  const handleSendResetCode = async () => {
     if (!email) {
       Alert.alert('Error', 'Please enter your email');
       return;
@@ -97,26 +120,118 @@ const LoginScreen = ({ navigation }) => {
     setLoading(true);
     try {
       await forgotPassword(email);
-      Alert.alert('Success', 'Password reset email sent');
+      Alert.alert('Success', 'Verification code sent to your email');
+      setForgotPasswordStep(2);
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to send reset email');
+      console.error('Forgot password error:', error);
+      Alert.alert('Error', 'Failed to send reset code. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  const handleGoogleLogin = () => {
-    // TODO: Implement Google login with AuthContext
-    Alert.alert('Info', 'Google login coming soon');
+  const handleResetPassword = async () => {
+    if (!resetCode || !newPassword) {
+      Alert.alert('Error', 'Please fill all fields');
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await resetPassword(email, resetCode, newPassword);
+      Alert.alert('Success', 'Password reset successfully! You can now login.');
+      setMode('login');
+      setForgotPasswordStep(1);
+      setResetCode('');
+      setNewPassword('');
+    } catch (error) {
+      console.error('Reset password error:', error);
+      let errorMessage = 'Password reset failed';
+
+      if (error.code === 'CodeMismatchException') {
+        errorMessage = 'Invalid verification code.';
+      } else if (error.code === 'ExpiredCodeException') {
+        errorMessage = 'Code expired. Request a new one.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert('Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOtpVerification = async () => {
+    if (!otp || otp.length !== 6) {
+      Alert.alert('Error', 'Please enter a valid 6-digit verification code');
+      return;
+    }
+
+    setOtpLoading(true);
+    try {
+      await verifyEmail(email, otp);
+      Alert.alert('Success', 'Email verified successfully! You can now login.');
+      setShowOtpModal(false);
+      setOtp('');
+      setMode('login');
+    } catch (error) {
+      console.error('OTP verification error:', error);
+      let errorMessage = 'Verification failed';
+
+      if (error.code === 'CodeMismatchException') {
+        errorMessage = 'Invalid verification code. Please try again.';
+      } else if (error.code === 'ExpiredCodeException') {
+        errorMessage =
+          'Verification code has expired. Please request a new one.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert('Verification Failed', errorMessage);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setOtpLoading(true);
+    try {
+      await resendVerificationCode(email);
+      Alert.alert('Success', 'Verification code sent to your email!');
+    } catch (error) {
+      console.error('Resend OTP error:', error);
+      Alert.alert(
+        'Error',
+        'Failed to resend verification code. Please try again.',
+      );
+    } finally {
+      setOtpLoading(false);
+    }
   };
 
   const renderLoginForm = () => (
     <View style={styles.formContainer}>
-      <Text style={styles.title}>Welcome Back</Text>
-      <Text style={styles.subtitle}>Sign in to continue</Text>
+      <LinearGradient
+        colors={['#1e293b', '#3b82f6']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.titleGradient}
+      >
+        <Text style={styles.titleText}>Welcome Back</Text>
+      </LinearGradient>
+      <Text style={styles.subtitle}>
+        Hey, welcome back to your special place
+      </Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
+      <Input
+        prefix={<Text style={styles.iconText}>📧</Text>}
+        placeholder="user@gmail.com"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -124,12 +239,22 @@ const LoginScreen = ({ navigation }) => {
         placeholderTextColor="#666"
       />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
+      <Input
+        prefix={<Text style={styles.iconText}>🔒</Text>}
+        suffix={
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setPasswordVisible(!passwordVisible)}
+          >
+            <Text style={styles.eyeIconText}>
+              {passwordVisible ? '🙈' : '👁️'}
+            </Text>
+          </TouchableOpacity>
+        }
+        placeholder="Enter your password"
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
+        secureTextEntry={!passwordVisible}
         placeholderTextColor="#666"
       />
 
@@ -143,19 +268,10 @@ const LoginScreen = ({ navigation }) => {
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
-        <Image
-          source={{
-            uri: 'https://cdn-icons-png.flaticon.com/512/2991/2991148.png',
-          }}
-          style={styles.googleIcon}
-        />
-        <Text style={styles.googleButtonText}>Continue with Google</Text>
-      </TouchableOpacity>
-
       <View style={styles.linkContainer}>
+        <Text style={styles.linkPrefix}>Don't have an account?</Text>
         <TouchableOpacity onPress={() => setMode('signup')}>
-          <Text style={styles.linkText}>Don't have an account? Sign Up</Text>
+          <Text style={styles.linkText}> Sign Up</Text>
         </TouchableOpacity>
       </View>
 
@@ -173,8 +289,8 @@ const LoginScreen = ({ navigation }) => {
       <Text style={styles.title}>Create Account</Text>
       <Text style={styles.subtitle}>Join us today</Text>
 
-      <TextInput
-        style={styles.input}
+      <Input
+        prefix={<Text style={styles.iconText}>👤</Text>}
         placeholder="Full Name"
         value={name}
         onChangeText={setName}
@@ -182,8 +298,8 @@ const LoginScreen = ({ navigation }) => {
         placeholderTextColor="#666"
       />
 
-      <TextInput
-        style={styles.input}
+      <Input
+        prefix={<Text style={styles.iconText}>📧</Text>}
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
@@ -192,21 +308,22 @@ const LoginScreen = ({ navigation }) => {
         placeholderTextColor="#666"
       />
 
-      <TextInput
-        style={styles.input}
+      <Input
+        prefix={<Text style={styles.iconText}>🔒</Text>}
+        suffix={
+          <TouchableOpacity
+            style={styles.eyeIcon}
+            onPress={() => setPasswordVisible(!passwordVisible)}
+          >
+            <Text style={styles.eyeIconText}>
+              {passwordVisible ? '🙈' : '👁️'}
+            </Text>
+          </TouchableOpacity>
+        }
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
-        placeholderTextColor="#666"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
+        secureTextEntry={!passwordVisible}
         placeholderTextColor="#666"
       />
 
@@ -221,8 +338,9 @@ const LoginScreen = ({ navigation }) => {
       </TouchableOpacity>
 
       <View style={styles.linkContainer}>
+        <Text style={styles.linkPrefix}>Already have an account?</Text>
         <TouchableOpacity onPress={() => setMode('login')}>
-          <Text style={styles.linkText}>Already have an account? Sign In</Text>
+          <Text style={styles.linkText}> Sign In</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -230,59 +348,91 @@ const LoginScreen = ({ navigation }) => {
 
   const renderForgotPasswordForm = () => (
     <View style={styles.formContainer}>
-      <Text style={styles.title}>Forgot Password</Text>
-      <Text style={styles.subtitle}>Enter your email to reset</Text>
+      {forgotPasswordStep === 1 ? (
+        <>
+          <Text style={styles.title}>Forgot Password</Text>
+          <Text style={styles.subtitle}>
+            Enter your email to receive a reset code
+          </Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        placeholderTextColor="#666"
-      />
+          <Input
+            prefix={<Text style={styles.iconText}>📧</Text>}
+            placeholder="Enter your email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            placeholderTextColor="#666"
+          />
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleForgotPassword}
-        disabled={loading}
-      >
-        <Text style={styles.buttonText}>
-          {loading ? 'Sending...' : 'Send Reset Link'}
-        </Text>
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleSendResetCode}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? 'Sending...' : 'Send Verification Code'}
+            </Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <>
+          <Text style={styles.title}>Reset Password</Text>
+          <Text style={styles.subtitle}>
+            Enter the code and your new password
+          </Text>
+
+          <Input
+            prefix={<Text style={styles.iconText}>🔒</Text>}
+            placeholder="000000"
+            value={resetCode}
+            onChangeText={setResetCode}
+            keyboardType="numeric"
+            maxLength={6}
+            placeholderTextColor="#666"
+          />
+
+          <Input
+            prefix={<Text style={styles.iconText}>🔑</Text>}
+            placeholder="New Password"
+            value={newPassword}
+            onChangeText={setNewPassword}
+            secureTextEntry
+            placeholderTextColor="#666"
+          />
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleResetPassword}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? 'Resetting...' : 'Reset Password'}
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
 
       <View style={styles.linkContainer}>
-        <TouchableOpacity onPress={() => setMode('login')}>
+        {forgotPasswordStep === 2 && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => setForgotPasswordStep(1)}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+        )}
+        <TouchableOpacity
+          onPress={() => {
+            setMode('login');
+            setForgotPasswordStep(1);
+            setResetCode('');
+            setNewPassword('');
+          }}
+        >
           <Text style={styles.linkText}>Back to Sign In</Text>
         </TouchableOpacity>
       </View>
-    </View>
-  );
-
-  const renderModeSwitch = () => (
-    <View style={styles.modeContainer}>
-      <TouchableOpacity
-        style={[styles.modeButton, mode === 'login' && styles.modeActive]}
-        onPress={() => setMode('login')}
-      >
-        <Text
-          style={[styles.modeText, mode === 'login' && styles.modeTextActive]}
-        >
-          Sign In
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.modeButton, mode === 'signup' && styles.modeActive]}
-        onPress={() => setMode('signup')}
-      >
-        <Text
-          style={[styles.modeText, mode === 'signup' && styles.modeTextActive]}
-        >
-          Sign Up
-        </Text>
-      </TouchableOpacity>
     </View>
   );
 
@@ -290,15 +440,78 @@ const LoginScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.logoContainer}>
-          <Text style={styles.appName}>YottaAcademy</Text>
+          <Image source={Logo} style={styles.logo} resizeMode="contain" />
         </View>
 
-        {mode === 'forgot' ? renderForgotPasswordForm() : renderLoginForm()}
+        {mode === 'forgot'
+          ? renderForgotPasswordForm()
+          : mode === 'signup'
+          ? renderSignupForm()
+          : renderLoginForm()}
 
         <View style={{ height: 20 }} />
-
-        {renderModeSwitch()}
       </ScrollView>
+
+      {/* OTP Verification Modal */}
+      {showOtpModal && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => {
+                setShowOtpModal(false);
+                setOtp('');
+              }}
+            >
+              <Text style={styles.modalCloseText}>✕</Text>
+            </TouchableOpacity>
+
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalIcon}>🔒</Text>
+              <Text style={styles.modalTitle}>Verify Your Email</Text>
+            </View>
+
+            <Text style={styles.modalSubtitle}>
+              We've sent a 6-digit verification code to{'\n'}
+              <Text style={styles.modalEmail}>{email}</Text>
+            </Text>
+
+            <TextInput
+              style={styles.otpInput}
+              placeholder="000000"
+              value={otp}
+              onChangeText={text =>
+                setOtp(text.replace(/[^0-9]/g, '').slice(0, 6))
+              }
+              keyboardType="numeric"
+              maxLength={6}
+              autoFocus
+              textAlign="center"
+              placeholderTextColor="#ccc"
+            />
+
+            <TouchableOpacity
+              style={[styles.button, styles.modalButton]}
+              onPress={handleOtpVerification}
+              disabled={otp.length !== 6 || otpLoading}
+            >
+              <Text style={styles.buttonText}>
+                {otpLoading ? 'Verifying...' : 'Verify Email'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.resendButton}
+              onPress={handleResendOtp}
+              disabled={otpLoading}
+            >
+              <Text style={styles.resendButtonText}>
+                Didn't receive the code? Resend
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -306,7 +519,9 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+  },
+  safeArea: {
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
@@ -317,11 +532,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 32,
   },
-  appName: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#2575fc',
-    marginBottom: 8,
+  logo: {
+    width: 200,
+    height: 60,
   },
   formContainer: {
     flex: 1,
@@ -329,9 +542,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
     textAlign: 'center',
     marginBottom: 8,
+    color: '#1e293b', // Dark color from gradient
   },
   subtitle: {
     fontSize: 16,
@@ -398,6 +611,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
+  linkPrefix: {
+    color: '#666',
+    fontSize: 14,
+  },
   modeContainer: {
     flexDirection: 'row',
     backgroundColor: '#f5f7fa',
@@ -422,6 +639,158 @@ const styles = StyleSheet.create({
   },
   modeTextActive: {
     color: '#fff',
+  },
+  passwordInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e1e5e9',
+    borderRadius: 12,
+    marginBottom: 16,
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 16,
+  },
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#333',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e1e5e9',
+    borderRadius: 12,
+    marginBottom: 16,
+    backgroundColor: '#f8f9fa',
+    paddingHorizontal: 16,
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  inputWithIcon: {
+    flex: 1,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#333',
+  },
+  eyeIcon: {
+    padding: 4,
+  },
+  eyeIconText: {
+    fontSize: 18,
+  },
+  iconText: {
+    fontSize: 20,
+  },
+  inputPrefix: {
+    marginRight: 12,
+  },
+  inputSuffix: {
+    marginLeft: 8,
+  },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 24,
+    marginHorizontal: 24,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  modalCloseButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 4,
+  },
+  modalHeader: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 20,
+  },
+  modalEmail: {
+    fontWeight: '600',
+    color: '#2575fc',
+  },
+  otpInput: {
+    borderWidth: 2,
+    borderColor: '#e1e5e9',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    letterSpacing: 8,
+    marginBottom: 24,
+    backgroundColor: '#f8f9fa',
+    color: '#333',
+    width: '100%',
+    maxWidth: 200,
+  },
+  modalButton: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  resendButton: {
+    paddingVertical: 8,
+  },
+  resendButtonText: {
+    color: '#2575fc',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  modalCloseText: {
+    fontSize: 18,
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  modalIcon: {
+    fontSize: 40,
+  },
+  titleGradient: {
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignSelf: 'center',
+  },
+  titleText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#fff',
+  },
+  backButton: {
+    marginBottom: 8,
+  },
+  backButtonText: {
+    color: '#2575fc',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 

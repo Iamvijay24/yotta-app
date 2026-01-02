@@ -9,6 +9,7 @@ import CoursesListScreen from '../screens/CoursesListScreen';
 import MyProgressScreen from '../screens/MyProgressScreen';
 import AccountScreen from '../screens/AccountScreen';
 import CourseDetailsScreen from '../screens/CourseDetailsScreen';
+import VideoPlayerScreen from '../screens/VideoPlayerScreen';
 import PaymentsScreen from '../screens/PaymentsScreen';
 
 const Stack = createNativeStackNavigator();
@@ -46,7 +47,7 @@ const TabStack = () => (
       tabBarIcon: ({ focused, color, size }) => {
         let iconName;
 
-        if (route.name === 'Courses List') {
+        if (route.name === 'Courses') {
           iconName = 'library-books';
         } else if (route.name === 'My Progress') {
           iconName = 'show-chart';
@@ -58,7 +59,7 @@ const TabStack = () => (
       },
     })}
   >
-    <Tab.Screen name="Courses List" component={CoursesListScreen} />
+    <Tab.Screen name="Courses" component={CoursesListScreen} />
     <Tab.Screen name="My Progress" component={MyProgressScreen} />
     <Tab.Screen name="Account" component={AccountScreen} />
   </Tab.Navigator>
@@ -68,6 +69,7 @@ const MainNavigator = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="MainTabs" component={TabStack} />
     <Stack.Screen name="CourseDetails" component={CourseDetailsScreen} />
+    <Stack.Screen name="VideoPlayer" component={VideoPlayerScreen} />
     <Stack.Screen name="Payments" component={PaymentsScreen} />
   </Stack.Navigator>
 );

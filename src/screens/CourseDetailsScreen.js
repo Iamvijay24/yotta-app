@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
   Image,
   ScrollView,
   TouchableOpacity,
+  TextInput,
   StyleSheet,
   StatusBar,
   Alert,
@@ -15,321 +16,165 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../shared/api/AuthContext';
 import { PaymentAPI } from '../services/payment.services';
+import { DashboardAPI } from '../services/dashboard.services';
+import course_overview from '../components/data/course_overview';
 
 const CourseDetailsScreen = ({ navigation, route }) => {
-  const { course } = route.params;
+  const { course, isEnrolled = false } = route.params;
   const { user, isAuthenticated } = useAuth();
   const [enrollLoading, setEnrollLoading] = useState(false);
   const [expandedLessons, setExpandedLessons] = useState(new Set());
-  const [courseData] = useState({
-    status: 'success',
-    course: {
-      category_id: 9,
-      rating: 3,
-      category_name: 'AI & Machine Learning',
-      status: 'published',
-      reviews: 400,
-      course_id: 'dffdf5cc',
-      completed_lessons: 5,
-      overall_lessons: 89,
-      thumbnail:
-        'https://www.google.com/search?sca_esv=7ea9874e2de762c7&sxsrf=AE3TifPdZQVCqHpKteyT9XJPsxPmXl03KQ:1760796341919&udm=2&fbs=AIIjpHxU7SXXniUZfeShr2fp4giZud1z6kQpMfoEdCJxnpm_3W-pLdZZVzNY_L9_ftx08kwv-_tUbRt8pOUS8_MjaceHuSAD6YvWZ0rfFzwmtmaBgLepZn2IJkVH-w3cPU5sPVz9l1Pp06apNShUnFfpGUJOF8p91U6HxH3ukND0OVTTVy0CGuHNdViLZqynGb0mLSRGeGVO46qnJ_2yk3F0uV6R6BW9rQ&q=machine+learning+with+python&sa=X&ved=2ahUKEwinme3D9a2QAxXmzzgGHStRJF8QtKgLegQIFRAB&biw=1540&bih=747&dpr=1#vhid=HagnSMI8BN39AM&vssid=mosaic',
-      description:
-        'Learn to build chatbots using Generative AI with hands-on projects.',
-      price: 150,
-      tags: ['python', 'AI', 'programming'],
-      title: 'Building Chatbots using Generative AI with HandsOn',
-      requirements: [
-        'A computer with internet access.',
-        'Basic understanding of Python programming.',
-        'Free or trial account with OpenAI API or similar LLM service.',
-      ],
-      certificate: 'Upon completion of the course',
-      oldPrice: '2000',
-      difficulty: 'Moderate',
-      language: 'English',
-      students: '2300',
-      learnings: [
-        'Understand the fundamentals of Generative AI and Large Language Models (LLMs).',
-        "Learn how chatbots work — from rule-based systems to generative AI-driven designs, Explore prompt engineering techniques to make chatbots more effective, Build a functional chatbot using OpenAI's GPT models with hands-on examples.",
-        'Integrate the chatbot into web or messaging platforms, Understand ethical AI principles and deployment best practices',
-      ],
-      offerPrice: '399',
-      duration: '4 hours 32 mins',
-      instructor_id: 'fdf7d178',
-    },
-    structure: [
-      {
-        lesson_id: '5ac20093',
-        course_id: 'dffdf5cc',
-        title: 'Designing Conversational Flows',
-        order_index: 2,
-        topics: [
-          {
-            lesson_id: '5ac20093',
-            topic_id: '6c4dff8f',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/ce6958b3.mp4',
-            description: 'Testing conversation flows',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/ce6958b3_thumbnail.png',
-            duration: '3 mins',
-            title: 'Testing conversation flows',
-            type: 'video',
-          },
-          {
-            lesson_id: '5ac20093',
-            topic_id: '8e434b4c',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/a7ef1b24.mp4',
-            description: 'Understanding user intents',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/a7ef1b24_thumbnail.png',
-            duration: '3 mins',
-            title: 'Understanding user intents',
-            type: 'video',
-          },
-          {
-            lesson_id: '5ac20093',
-            topic_id: 'ba7f2ad6',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/92400372.mp4',
-            description: 'Designing conversation flow diagrams',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/92400372_thumbnail.png',
-            duration: '3 mins',
-            title: 'Designing conversation flow diagrams',
-            type: 'video',
-          },
-          {
-            lesson_id: '5ac20093',
-            topic_id: 'a7b4a923',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/55ef3666.mp4',
-            description: 'Creating dialogue scenarios',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/55ef3666_thumbnail.png',
-            duration: '3 mins',
-            title: 'Creating dialogue scenarios',
-            type: 'video',
-          },
-        ],
-      },
-      {
-        lesson_id: '985fea60',
-        course_id: 'dffdf5cc',
-        title: 'Natural Language Processing (NLP)',
-        order_index: 3,
-        topics: [
-          {
-            lesson_id: '985fea60',
-            topic_id: '429bd3e2',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/ef780ce5.mp4',
-            description:
-              'Sentiment analysis and Named Entity Recognition (NER)',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/ef780ce5_thumbnail.png',
-            duration: '3 mins',
-            title: 'Sentiment analysis and Named Entity Recognition (NER)',
-            type: 'video',
-          },
-          {
-            lesson_id: '985fea60',
-            topic_id: '3019646b',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/cf7c86fe.mp4',
-            description: 'Introduction to NLP',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/cf7c86fe_thumbnail.png',
-            duration: '3 mins',
-            title: 'Introduction to NLP',
-            type: 'video',
-          },
-          {
-            lesson_id: '985fea60',
-            topic_id: 'abf895c9',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/d4397a0c.mp4',
-            description: 'Tokenization and Text Preprocessing',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/d4397a0c_thumbnail.png',
-            duration: '3 mins',
-            title: 'Tokenization and Text Preprocessing',
-            type: 'video',
-          },
-          {
-            lesson_id: '985fea60',
-            topic_id: 'a85f568e',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/e7feeeda.mp4',
-            description: 'Training NLP models',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/e7feeeda_thumbnail.png',
-            duration: '3 mins',
-            title: 'Training NLP models',
-            type: 'video',
-          },
-        ],
-      },
-      {
-        lesson_id: '6957017d',
-        course_id: 'dffdf5cc',
-        title: 'Deployment and Integration',
-        order_index: 4,
-        topics: [
-          {
-            lesson_id: '6957017d',
-            topic_id: '2ccc8209',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/199f4c13.mp4',
-            description: 'Scaling chatbot infrastructure',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/199f4c13_thumbnail.png',
-            duration: '3 mins',
-            title: 'Scaling chatbot infrastructure',
-            type: 'video',
-          },
-          {
-            lesson_id: '6957017d',
-            topic_id: '2c5b385a',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/a0bf8a07.mp4',
-            description: 'Integrating chatbots with messaging platforms',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/a0bf8a07_thumbnail.png',
-            duration: '3 mins',
-            title: 'Integrating chatbots with messaging platforms',
-            type: 'video',
-          },
-          {
-            lesson_id: '6957017d',
-            topic_id: '77129dbe',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/3d532e69.mp4',
-            description: 'Monitoring performance and user feedback',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/3d532e69_thumbnail.png',
-            duration: '3 mins',
-            title: 'Monitoring performance and user feedback',
-            type: 'video',
-          },
-          {
-            lesson_id: '6957017d',
-            topic_id: 'e48b130f',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/89e351ea.mp4',
-            description: 'Deploying chatbots on various platforms',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/89e351ea_thumbnail.png',
-            duration: '3 mins',
-            title: 'Deploying chatbots on various platforms',
-            type: 'video',
-          },
-        ],
-      },
-      {
-        lesson_id: 'fdaaeaa0',
-        course_id: 'dffdf5cc',
-        title: 'Introduction to Chatbots',
-        order_index: 1,
-        topics: [
-          {
-            lesson_id: 'fdaaeaa0',
-            topic_id: '7ad93d84',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/41a8839b.mp4',
-            description: 'Introduction to Generative AI',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/41a8839b_thumbnail.png',
-            duration: '3 mins',
-            title: 'Introduction to Generative AI',
-            type: 'video',
-          },
-          {
-            lesson_id: 'fdaaeaa0',
-            topic_id: 'a69b76f7',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/6c67a931.mp4',
-            description: 'Overview of chatbots',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/6c67a931_thumbnail.png',
-            duration: '3 mins',
-            title: 'Overview of chatbots',
-            type: 'video',
-          },
-          {
-            lesson_id: 'fdaaeaa0',
-            topic_id: '16d8b353',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/97e33a33.mp4',
-            description: 'Benefits of using chatbots',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/97e33a33_thumbnail.png',
-            duration: '3 mins',
-            title: 'Benefits of using chatbots',
-            type: 'video',
-          },
-        ],
-      },
-      {
-        lesson_id: '2c555f33',
-        course_id: 'dffdf5cc',
-        title: 'Advanced Topics in Chatbot Development',
-        order_index: 5,
-        topics: [
-          {
-            lesson_id: '2c555f33',
-            topic_id: '96ffd284',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/ef8569ec.mp4',
-            description: 'Multi-turn conversations',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/ef8569ec_thumbnail.png',
-            duration: '3 mins',
-            title: 'Multi-turn conversations',
-            type: 'video',
-          },
-          {
-            lesson_id: '2c555f33',
-            topic_id: '7080af4b',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/d118edd5.mp4',
-            description: 'Context and memory management',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/d118edd5_thumbnail.png',
-            duration: '3 mins',
-            title: 'Context and memory management',
-            type: 'video',
-          },
-          {
-            lesson_id: '2c555f33',
-            topic_id: 'd437f862',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/bcf5f463.mp4',
-            description: 'Future trends in chatbot development',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/bcf5f463_thumbnail.png',
-            duration: '3 mins',
-            title: 'Future trends in chatbot development',
-            type: 'video',
-          },
-          {
-            lesson_id: '2c555f33',
-            topic_id: 'd4197e26',
-            content_url:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/d337f4b3.mp4',
-            description: 'Persisting conversation history',
-            thumbnail:
-              'https://videoassistant-videos-bucket.s3.amazonaws.com/d337f4b3_thumbnail.png',
-            duration: '3 mins',
-            title: 'Persisting conversation history',
-            type: 'video',
-          },
-        ],
-      },
-    ],
-  });
+  const [courseData, setCourseData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [videoDurations, setVideoDurations] = useState({});
+  const [totalDurationFormatted, setTotalDurationFormatted] = useState(null);
+  const [couponCode, setCouponCode] = useState('');
+
+  // Helper functions
+  const capitalize = str =>
+    !str ? 'Unknown' : str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+  const parseApiDurationToSeconds = durStr => {
+    if (!durStr) return 0;
+    const trimmed = durStr.trim().toLowerCase();
+    if (trimmed.includes('min') || trimmed.includes('mins')) {
+      const match = trimmed.match(/(\d+)/);
+      return match ? parseInt(match[1]) * 60 : 0;
+    }
+    const parts = trimmed.split(':');
+    if (parts.length === 3) {
+      return (
+        parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2])
+      );
+    } else if (parts.length === 2) {
+      return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+    return 0;
+  };
+
+  const formatDuration = duration => {
+    if (!duration) return '0 hours';
+
+    // Ensure duration is a string
+    const durationStr = String(duration);
+
+    // If duration is already formatted (like "5h 30m"), return as is
+    if (durationStr.includes('h') || durationStr.includes('m')) {
+      return durationStr;
+    }
+
+    // Handle HH:MM:SS or HH:MM format
+    const parts = durationStr.split(':');
+    let hours = 0;
+    let minutes = 0;
+
+    if (parts.length === 3) {
+      // HH:MM:SS format - treat as HH:MM
+      hours = parseInt(parts[0], 10);
+      minutes = parseInt(parts[1], 10);
+    } else if (parts.length === 2) {
+      // HH:MM format
+      hours = parseInt(parts[0], 10);
+      minutes = parseInt(parts[1], 10);
+    } else {
+      return '0 hours';
+    }
+
+    // Use the same logic as the web version
+    const totalHours = minutes >= 30 ? hours + 0.5 : hours;
+    return totalHours === 1 ? '1 hour' : `${totalHours} hours`;
+  };
+
+  const formatTotalDuration = totalSeconds => {
+    if (!totalSeconds || totalSeconds <= 0) return null;
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+    if (hours > 0) {
+      return minutes >= 30 ? `${hours + 0.5} hours` : `${hours} hours`;
+    } else if (minutes > 0) {
+      return `${minutes}m`;
+    }
+    return null;
+  };
+
+  // Resolve data with fallback
+  const resolvedCourseData = useMemo(() => {
+    let rawStructure = courseData;
+    const hasError = !!error;
+    // Use fallback data if API fails
+    if (!rawStructure && hasError) {
+      rawStructure = {
+        course: {
+          title: course_overview.title,
+          description: course_overview.description,
+          thumbnail: course_overview.thumbnail,
+          overall_lessons: course_overview.total_lessons,
+          students: course_overview.students,
+          rating: course_overview.rating,
+          difficulty: course_overview.difficulty,
+          language: course_overview.language,
+          duration: course_overview.duration,
+          oldPrice: course_overview.oldPrice,
+          offerPrice: course_overview.offerPrice,
+          certificate: course_overview.certificate,
+          requirements: course_overview.requirements,
+          learnings: course_overview.learnings,
+        },
+        structure: course_overview.modules,
+      };
+    }
+    return rawStructure;
+  }, [courseData, error]);
+
+  // Fetch course structure on component mount
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const courseId = course.course_id || course.id;
+        const response = await DashboardAPI.getCourseStructure(courseId);
+        setCourseData(response);
+      } catch (err) {
+        console.error('Error fetching course data:', err);
+        setError(err.message || 'Failed to load course details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (course) {
+      fetchCourseData();
+    }
+  }, [course]);
+
+  // Calculate durations when course data changes
+  useEffect(() => {
+    if (resolvedCourseData?.structure) {
+      const durationsMap = {};
+      let totalSeconds = 0;
+      resolvedCourseData.structure.forEach(module => {
+        if (module.topics) {
+          module.topics.forEach(topic => {
+            if (topic.duration) {
+              durationsMap[topic.topic_id] = topic.duration;
+              const seconds = parseApiDurationToSeconds(topic.duration);
+              totalSeconds += seconds;
+            }
+          });
+        }
+      });
+      setVideoDurations(durationsMap);
+      if (totalSeconds > 0) {
+        setTotalDurationFormatted(formatTotalDuration(totalSeconds));
+      } else {
+        setTotalDurationFormatted(null);
+      }
+    }
+  }, [resolvedCourseData]);
 
   const toggleLessonExpansion = lessonId => {
     setExpandedLessons(prev => {
@@ -352,7 +197,7 @@ const CourseDetailsScreen = ({ navigation, route }) => {
       navigation.navigate('Login');
       return;
     }
-    if (!courseData.course.offerPrice) {
+    if (!resolvedCourseData.course.offerPrice) {
       Alert.alert('Error', 'Course price information is missing');
       return;
     }
@@ -360,9 +205,9 @@ const CourseDetailsScreen = ({ navigation, route }) => {
     try {
       const userId = user?.sub || user?.['cognito:username'];
       const payload = {
-        payment_plan: courseData.course.offerPrice,
+        payment_plan: resolvedCourseData.course.offerPrice,
         user_id: userId,
-        course_id: courseData.course.course_id,
+        course_id: resolvedCourseData.course.course_id,
         success_url: '', // Not needed for mobile, can be empty or add dummy
         cancel_url: '', // Not needed for mobile
       };
@@ -394,6 +239,19 @@ const CourseDetailsScreen = ({ navigation, route }) => {
     }
   };
 
+  const getIcon = type => {
+    switch (type?.toLowerCase()) {
+      case 'video':
+        return 'videocam';
+      case 'article':
+        return 'article';
+      case 'quiz':
+        return 'quiz';
+      default:
+        return 'radio-button-checked';
+    }
+  };
+
   const renderExpandableLessonItem = lesson => {
     const isExpanded = expandedLessons.has(lesson.lesson_id);
 
@@ -422,12 +280,14 @@ const CourseDetailsScreen = ({ navigation, route }) => {
           <View style={styles.topicsContainer}>
             {lesson.topics.map((topic, index) => (
               <View key={topic.topic_id} style={styles.topicItem}>
-                <View style={styles.topicBullet}>
-                  <Text style={styles.topicBulletText}>{index + 1}</Text>
+                <View style={styles.topicIconContainer}>
+                  <Icon name={getIcon(topic.type)} size={16} color="#565C72" />
                 </View>
                 <View style={styles.topicContent}>
                   <Text style={styles.topicTitle}>{topic.title}</Text>
-                  <Text style={styles.topicDuration}>{topic.duration}</Text>
+                  <Text style={styles.topicDuration}>
+                    {videoDurations[topic.topic_id] || topic.duration || '—'}
+                  </Text>
                 </View>
               </View>
             ))}
@@ -436,6 +296,79 @@ const CourseDetailsScreen = ({ navigation, route }) => {
       </View>
     );
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading course details...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Failed to load course details</Text>
+          <Text style={styles.errorSubtext}>{error}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => {
+              // Retry logic would go here
+              const courseId = course.course_id || course.id;
+              DashboardAPI.getCourseStructure(courseId)
+                .then(setCourseData)
+                .catch(setError);
+            }}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // No course data
+  if (!resolvedCourseData) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backButtonText}>← Back</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>Course details not available</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -455,72 +388,223 @@ const CourseDetailsScreen = ({ navigation, route }) => {
         </View>
 
         <Image
-          source={{ uri: courseData.course.thumbnail }}
+          source={{
+            uri: resolvedCourseData.course?.thumbnail || course.thumbnail,
+          }}
           style={styles.thumbnail}
           resizeMode="cover"
+          defaultSource={require('../assets/course1.jpg')}
         />
 
         <View style={styles.content}>
-          <Text style={styles.title}>{courseData.course.title}</Text>
+          <Text style={styles.title}>
+            {resolvedCourseData.course?.title ||
+              course.title ||
+              'Untitled Course'}
+          </Text>
 
-          <View style={styles.metaContainer}>
-            <Text style={styles.metaText}>
-              Category: {courseData.course.category_name}
-            </Text>
-            <Text style={styles.metaText}>
-              Rating: {courseData.course.rating}/5
-            </Text>
-            <Text style={styles.metaText}>
-              Students: {courseData.course.students}
-            </Text>
-            <Text style={styles.metaText}>
-              Duration: {courseData.course.duration}
-            </Text>
-            <Text style={styles.metaText}>
-              Language: {courseData.course.language}
-            </Text>
+          {/* Course stats sidebar-like info */}
+          <View style={styles.statsContainer}>
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Icon name="library-books" size={20} color="#2575fc" />
+                <View style={styles.statTextContainer}>
+                  <Text style={styles.statTitle}>Lessons</Text>
+                  <Text style={styles.statValue}>
+                    {resolvedCourseData.course?.overall_lessons ||
+                      resolvedCourseData.structure?.reduce(
+                        (a, s) => a + (s.topics?.length || 0),
+                        0,
+                      ) ||
+                      'N/A'}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.statItem}>
+                <Icon name="timeline" size={20} color="#2575fc" />
+                <View style={styles.statTextContainer}>
+                  <Text style={styles.statTitle}>Difficulty</Text>
+                  <Text style={styles.statValue}>
+                    {capitalize(resolvedCourseData.course?.difficulty) || 'N/A'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Icon name="people" size={20} color="#2575fc" />
+                <View style={styles.statTextContainer}>
+                  <Text style={styles.statTitle}>Language</Text>
+                  <Text style={styles.statValue}>
+                    {resolvedCourseData.course?.language}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.statItem}>
+                <Icon name="schedule" size={20} color="#2575fc" />
+                <View style={styles.statTextContainer}>
+                  <Text style={styles.statTitle}>Duration</Text>
+                  <Text style={styles.statValue}>
+                    {formatDuration(resolvedCourseData.course?.duration) ||
+                      totalDurationFormatted ||
+                      'N/A'}
+                  </Text>
+                </View>
+              </View>
+            </View>
           </View>
 
           <Text style={styles.description}>
-            {courseData.course.description}
+            {resolvedCourseData.course?.description ||
+              course.description ||
+              'No description available'}
           </Text>
 
-          <Text style={styles.sectionTitle}>What You'll Learn</Text>
-          {courseData.course.learnings.map((learning, index) => (
-            <Text key={index} style={styles.learningItem}>
-              • {learning}
-            </Text>
-          ))}
+          {resolvedCourseData.course?.learnings &&
+            resolvedCourseData.course.learnings.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>What You'll Learn</Text>
+                {resolvedCourseData.course.learnings.map((learning, index) => (
+                  <Text key={index} style={styles.learningItem}>
+                    • {learning}
+                  </Text>
+                ))}
+              </>
+            )}
 
-          <Text style={styles.sectionTitle}>Requirements</Text>
-          {courseData.course.requirements.map((req, index) => (
-            <Text key={index} style={styles.requirementItem}>
-              • {req}
-            </Text>
-          ))}
+          {resolvedCourseData.course?.requirements &&
+            resolvedCourseData.course.requirements.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>Requirements</Text>
+                <Text style={styles.assignmentText}>
+                  Plan to dedicate a minimum of 1-2 hours a day to watch
+                  lectures videos, engage in Q&A sessions and complete
+                  assignments.
+                </Text>
+                {resolvedCourseData.course.requirements.map((req, index) => (
+                  <Text key={index} style={styles.requirementItem}>
+                    • {req}
+                  </Text>
+                ))}
+              </>
+            )}
 
-          <Text style={styles.sectionTitle}>Course Structure</Text>
-          {courseData.structure
-            .sort((a, b) => a.order_index - b.order_index)
-            .map(renderExpandableLessonItem)}
+          {resolvedCourseData.structure &&
+            resolvedCourseData.structure.length > 0 && (
+              <>
+                <Text style={styles.sectionTitle}>
+                  Course Table of Contents
+                </Text>
+                <Text style={styles.totalLessonsText}>
+                  {resolvedCourseData.structure.reduce(
+                    (a, s) => a + (s.topics?.length || 0),
+                    0,
+                  )}{' '}
+                  Lessons
+                </Text>
+                {resolvedCourseData.structure
+                  .sort((a, b) => a.order_index - b.order_index)
+                  .map(renderExpandableLessonItem)}
+              </>
+            )}
 
-          <View style={styles.priceContainer}>
-            <Text style={styles.oldPrice}>₹{courseData.course.oldPrice}</Text>
-            <Text style={styles.price}>₹{courseData.course.offerPrice}</Text>
-          </View>
+          {!isEnrolled && resolvedCourseData.course?.offerPrice && (
+            <View style={styles.priceContainer}>
+              <View style={styles.priceSection}>
+                <Text style={styles.currentPrice}>
+                  ₹{resolvedCourseData.course.offerPrice}
+                </Text>
+                {resolvedCourseData.course.oldPrice &&
+                  Number(resolvedCourseData.course.oldPrice) >
+                    Number(resolvedCourseData.course.offerPrice) && (
+                    <Text style={styles.originalPrice}>
+                      ₹{resolvedCourseData.course.oldPrice}
+                    </Text>
+                  )}
+              </View>
+              <View style={styles.couponSection}>
+                <Text style={styles.couponText}>Enter Coupon Code</Text>
+                <View style={styles.couponInputContainer}>
+                  <TextInput
+                    style={styles.couponInput}
+                    placeholder="Enter coupon code"
+                    placeholderTextColor="#999"
+                    value={couponCode}
+                    onChangeText={setCouponCode}
+                    autoCapitalize="characters"
+                    autoCorrect={false}
+                  />
+                  <TouchableOpacity
+                    style={styles.couponButton}
+                    onPress={() => {
+                      if (couponCode.trim()) {
+                        Alert.alert(
+                          'Coupon Applied',
+                          `Coupon "${couponCode}" applied successfully!`,
+                        );
+                        setCouponCode('');
+                      } else {
+                        Alert.alert('Error', 'Please enter a coupon code');
+                      }
+                    }}
+                  >
+                    <Text style={styles.couponButtonText}>Apply</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          )}
         </View>
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.enrollButton}
-          onPress={handleEnroll}
-          disabled={enrollLoading}
-        >
-          <Text style={styles.enrollButtonText}>
-            {enrollLoading ? 'Processing...' : 'Enroll Now'}
-          </Text>
-        </TouchableOpacity>
+        {isEnrolled ? (
+          <TouchableOpacity
+            style={styles.enrollButton}
+            onPress={() => {
+              // Extract all topics from course structure
+              const allTopics = [];
+              if (resolvedCourseData.structure) {
+                resolvedCourseData.structure.forEach(module => {
+                  if (module.topics) {
+                    module.topics.forEach(topic => {
+                      allTopics.push({
+                        ...topic,
+                        sectionTitle: module.title,
+                        sectionKey: module.lesson_id,
+                      });
+                    });
+                  }
+                });
+              }
+
+              if (allTopics.length > 0) {
+                navigation.navigate('VideoPlayer', {
+                  course: resolvedCourseData.course,
+                  allTopics,
+                  currentTopicIndex: 0,
+                });
+              } else {
+                Alert.alert(
+                  'No Content',
+                  'No video content available for this course yet.',
+                );
+              }
+            }}
+          >
+            <Text style={styles.enrollButtonText}>Continue Learning</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            style={styles.enrollButton}
+            onPress={handleEnroll}
+            disabled={enrollLoading}
+          >
+            <Text style={styles.enrollButtonText}>
+              {enrollLoading ? 'Processing...' : 'Enroll Now'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -673,20 +757,68 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   priceContainer: {
+    marginTop: 30,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  priceSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
+    justifyContent: 'space-between',
+    marginBottom: 15,
   },
-  oldPrice: {
-    fontSize: 16,
-    color: '#999',
-    textDecorationLine: 'line-through',
-    marginRight: 10,
-  },
-  price: {
-    fontSize: 20,
+  currentPrice: {
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#2575fc',
+  },
+  originalPrice: {
+    fontSize: 18,
+    color: '#999',
+    textDecorationLine: 'line-through',
+  },
+  couponSection: {
+    marginTop: 15,
+  },
+  couponText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
+  },
+  couponInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  couponInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    backgroundColor: '#fff',
+    color: '#333',
+  },
+  couponButton: {
+    backgroundColor: '#2575fc',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 6,
+    alignItems: 'center',
+    minWidth: 80,
+  },
+  couponButtonText: {
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '500',
   },
   footer: {
     position: 'absolute',
@@ -708,6 +840,120 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 40,
+  },
+  errorText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  errorSubtext: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#2575fc',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+  },
+  statsContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    paddingHorizontal: 5,
+  },
+  statTextContainer: {
+    marginLeft: 10,
+  },
+  statTitle: {
+    fontSize: 12,
+    color: '#666',
+    textTransform: 'uppercase',
+    fontWeight: '500',
+  },
+  statValue: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '600',
+  },
+  assignmentText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 22,
+    marginBottom: 10,
+    fontStyle: 'italic',
+  },
+  totalLessonsText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  priceTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  priceSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  topicIconContainer: {
+    marginRight: 12,
   },
 });
 

@@ -1,0 +1,73 @@
+/* Global styles for React Native app - simplified without CSS variables */
+
+/* Basic global styles that work with React Native SCSS transformer */
+.container {
+  flex: 1;
+  background-color: #f5f7fa;
+}
+
+.header {
+  background-color: #2575fc;
+  padding: 20px;
+  padding-top: 50px;
+}
+
+.header-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.header-subtitle {
+  font-size: 16px;
+  color: #fff;
+  margin-top: 4px;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px;
+  /* Note: Shadow properties are handled in React Native StyleSheet, not CSS */
+}
+
+.button-primary {
+  background-color: #2575fc;
+  padding: 12px 24px;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-text {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.input {
+  border-width: 1px;
+  border-color: #dee2e6;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 16px;
+  background-color: #fff;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+
+.text-white {
+  color: #fff;
+}
+
+.bg-primary {
+  background-color: #2575fc;
+}
+
+.bg-white {
+  background-color: #fff;
+}

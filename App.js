@@ -1,8 +1,11 @@
 import React from 'react';
 import { StatusBar, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
+import { store } from './src/shared/store/redux/store';
 import { AuthProvider, useAuth } from './src/shared/api/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
+import './src/styles/global.scss';
 
 const AuthWrapper = () => {
   const { loading } = useAuth();
@@ -20,12 +23,14 @@ const AuthWrapper = () => {
 
 function App() {
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <StatusBar barStyle="dark-content" />
-        <AuthWrapper />
-      </AuthProvider>
-    </SafeAreaProvider>
+    <Provider store={store}>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <StatusBar barStyle="dark-content" />
+          <AuthWrapper />
+        </AuthProvider>
+      </SafeAreaProvider>
+    </Provider>
   );
 }
 
