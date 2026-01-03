@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+
 import { useAuth } from '../shared/api/AuthContext';
 import Logo from '../assets/Logo_main.png';
 
@@ -226,7 +227,7 @@ const LoginScreen = ({ navigation }) => {
       </Text>
 
       <Input
-        prefix={<Text style={styles.iconText}>📧</Text>}
+        prefix={<AntDesign name="mail" size={20} color="#666" />}
         placeholder="user@gmail.com"
         value={email}
         onChangeText={setEmail}
@@ -236,16 +237,18 @@ const LoginScreen = ({ navigation }) => {
       />
 
       <Input
-        prefix={<Text style={styles.iconText}>🔒</Text>}
+        prefix={<AntDesign name="lock" size={20} color="#666" />}
         suffix={
           <TouchableOpacity
             style={styles.eyeIcon}
             onPress={() => setPasswordVisible(!passwordVisible)}
             activeOpacity={0.7}
           >
-            <Text style={styles.eyeIconText}>
-              {passwordVisible ? '🙈' : '👁️'}
-            </Text>
+            <AntDesign
+              name={passwordVisible ? 'eyeo' : 'eye'}
+              size={20}
+              color="#666"
+            />
           </TouchableOpacity>
         }
         placeholder="Enter your password"
@@ -294,7 +297,7 @@ const LoginScreen = ({ navigation }) => {
       <Text style={styles.subtitle}>Join us today</Text>
 
       <Input
-        prefix={<Text style={styles.iconText}>👤</Text>}
+        prefix={<AntDesign name="user" size={20} color="#666" />}
         placeholder="Full Name"
         value={name}
         onChangeText={setName}
@@ -303,7 +306,7 @@ const LoginScreen = ({ navigation }) => {
       />
 
       <Input
-        prefix={<Text style={styles.iconText}>📧</Text>}
+        prefix={<AntDesign name="mail" size={20} color="#666" />}
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
@@ -313,16 +316,18 @@ const LoginScreen = ({ navigation }) => {
       />
 
       <Input
-        prefix={<Text style={styles.iconText}>🔒</Text>}
+        prefix={<AntDesign name="lock" size={20} color="#666" />}
         suffix={
           <TouchableOpacity
             style={styles.eyeIcon}
             onPress={() => setPasswordVisible(!passwordVisible)}
             activeOpacity={0.7}
           >
-            <Text style={styles.eyeIconText}>
-              {passwordVisible ? '🙈' : '👁️'}
-            </Text>
+            <AntDesign
+              name={passwordVisible ? 'eyeo' : 'eye'}
+              size={20}
+              color="#666"
+            />
           </TouchableOpacity>
         }
         placeholder="Password"
@@ -368,7 +373,7 @@ const LoginScreen = ({ navigation }) => {
           </Text>
 
           <Input
-            prefix={<Text style={styles.iconText}>📧</Text>}
+            prefix={<AntDesign name="mail" size={20} color="#666" />}
             placeholder="Enter your email"
             value={email}
             onChangeText={setEmail}
@@ -402,7 +407,7 @@ const LoginScreen = ({ navigation }) => {
           </Text>
 
           <Input
-            prefix={<Text style={styles.iconText}>🔒</Text>}
+            prefix={<AntDesign name="safety" size={20} color="#666" />}
             placeholder="000000"
             value={resetCode}
             onChangeText={setResetCode}
@@ -412,7 +417,7 @@ const LoginScreen = ({ navigation }) => {
           />
 
           <Input
-            prefix={<Text style={styles.iconText}>🔑</Text>}
+            prefix={<AntDesign name="lock" size={20} color="#666" />}
             placeholder="New Password"
             value={newPassword}
             onChangeText={setNewPassword}
@@ -493,7 +498,7 @@ const LoginScreen = ({ navigation }) => {
             </TouchableOpacity>
 
             <View style={styles.modalHeader}>
-              <Text style={styles.modalIcon}>🔒</Text>
+              <AntDesign name="safety" size={24} color="#3b82f6" />
               <Text style={styles.modalTitle}>Verify Your Email</Text>
             </View>
 
@@ -726,9 +731,7 @@ const styles = StyleSheet.create({
   eyeIcon: {
     padding: 4,
   },
-  eyeIconText: {
-    fontSize: 18,
-  },
+
   iconText: {
     fontSize: 20,
   },

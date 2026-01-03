@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const CourseCard = ({ course, onPress, isEnrolled = false }) => {
   const hasAIAssistance =
@@ -41,7 +41,7 @@ const CourseCard = ({ course, onPress, isEnrolled = false }) => {
         </View>
         {hasAIAssistance && (
           <View style={styles.aiBadge}>
-            <MaterialIcons name="smart-toy" size={12} color="#fff" />
+            <AntDesign name="android" size={12} color="#fff" />
             <Text style={styles.aiBadgeText}>AI Tutor</Text>
           </View>
         )}

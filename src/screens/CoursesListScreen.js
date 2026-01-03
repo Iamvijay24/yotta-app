@@ -7,7 +7,7 @@ import {
   StatusBar,
   TouchableOpacity,
 } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllCourses } from '../shared/store/redux/slices/dashboardSlice';
@@ -187,7 +187,7 @@ const CoursesListScreen = ({ navigation }) => {
         style={styles.floatingButton}
         onPress={() => setIsFilterModalVisible(true)}
       >
-        <MaterialIcons name="filter" size={24} color="#fff" />
+        <AntDesign name="filter" size={24} color="#fff" />
       </TouchableOpacity>
 
       {/* Course Filter Modal */}
