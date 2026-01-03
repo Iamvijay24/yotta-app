@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   Image,
+  Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -41,7 +42,7 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(true);
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otp, setOtp] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
@@ -50,6 +51,8 @@ const LoginScreen = ({ navigation }) => {
   const [newPassword, setNewPassword] = useState('');
 
   const handleLogin = async () => {
+    Keyboard.dismiss(); // Dismiss keyboard before processing
+
     if (!email || !password) {
       Alert.alert('Error', 'Please fill all fields');
       return;
@@ -217,14 +220,7 @@ const LoginScreen = ({ navigation }) => {
 
   const renderLoginForm = () => (
     <View style={styles.formContainer}>
-      <LinearGradient
-        colors={['#1e293b', '#3b82f6']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.titleGradient}
-      >
-        <Text style={styles.titleText}>Welcome Back</Text>
-      </LinearGradient>
+      <Text style={styles.titleText}>Welcome Back</Text>
       <Text style={styles.subtitle}>
         Hey, welcome back to your special place
       </Text>
@@ -245,6 +241,7 @@ const LoginScreen = ({ navigation }) => {
           <TouchableOpacity
             style={styles.eyeIcon}
             onPress={() => setPasswordVisible(!passwordVisible)}
+            activeOpacity={0.7}
           >
             <Text style={styles.eyeIconText}>
               {passwordVisible ? '🙈' : '👁️'}
@@ -254,19 +251,26 @@ const LoginScreen = ({ navigation }) => {
         placeholder="Enter your password"
         value={password}
         onChangeText={setPassword}
-        secureTextEntry={!passwordVisible}
+        secureTextEntry={passwordVisible}
         placeholderTextColor="#666"
       />
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleLogin}
-        disabled={loading}
+      <LinearGradient
+        colors={['#3b82f6', '#2563eb']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.buttonGradient}
       >
-        <Text style={styles.buttonText}>
-          {loading ? 'Signing In...' : 'Sign In'}
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'Signing In...' : 'Sign In'}
+          </Text>
+        </TouchableOpacity>
+      </LinearGradient>
 
       <View style={styles.linkContainer}>
         <Text style={styles.linkPrefix}>Don't have an account?</Text>
@@ -314,6 +318,7 @@ const LoginScreen = ({ navigation }) => {
           <TouchableOpacity
             style={styles.eyeIcon}
             onPress={() => setPasswordVisible(!passwordVisible)}
+            activeOpacity={0.7}
           >
             <Text style={styles.eyeIconText}>
               {passwordVisible ? '🙈' : '👁️'}
@@ -323,19 +328,26 @@ const LoginScreen = ({ navigation }) => {
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
-        secureTextEntry={!passwordVisible}
+        secureTextEntry={passwordVisible}
         placeholderTextColor="#666"
       />
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSignup}
-        disabled={loading}
+      <LinearGradient
+        colors={['#3b82f6', '#2563eb']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.buttonGradient}
       >
-        <Text style={styles.buttonText}>
-          {loading ? 'Creating Account...' : 'Sign Up'}
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSignup}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? 'Creating Account...' : 'Sign Up'}
+          </Text>
+        </TouchableOpacity>
+      </LinearGradient>
 
       <View style={styles.linkContainer}>
         <Text style={styles.linkPrefix}>Already have an account?</Text>
@@ -365,15 +377,22 @@ const LoginScreen = ({ navigation }) => {
             placeholderTextColor="#666"
           />
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleSendResetCode}
-            disabled={loading}
+          <LinearGradient
+            colors={['#3b82f6', '#2563eb']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.buttonGradient}
           >
-            <Text style={styles.buttonText}>
-              {loading ? 'Sending...' : 'Send Verification Code'}
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleSendResetCode}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? 'Sending...' : 'Send Verification Code'}
+              </Text>
+            </TouchableOpacity>
+          </LinearGradient>
         </>
       ) : (
         <>
@@ -401,15 +420,22 @@ const LoginScreen = ({ navigation }) => {
             placeholderTextColor="#666"
           />
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleResetPassword}
-            disabled={loading}
+          <LinearGradient
+            colors={['#3b82f6', '#2563eb']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.buttonGradient}
           >
-            <Text style={styles.buttonText}>
-              {loading ? 'Resetting...' : 'Reset Password'}
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleResetPassword}
+              disabled={loading}
+            >
+              <Text style={styles.buttonText}>
+                {loading ? 'Resetting...' : 'Reset Password'}
+              </Text>
+            </TouchableOpacity>
+          </LinearGradient>
         </>
       )}
 
@@ -490,15 +516,22 @@ const LoginScreen = ({ navigation }) => {
               placeholderTextColor="#ccc"
             />
 
-            <TouchableOpacity
-              style={[styles.button, styles.modalButton]}
-              onPress={handleOtpVerification}
-              disabled={otp.length !== 6 || otpLoading}
+            <LinearGradient
+              colors={['#3b82f6', '#2563eb']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.buttonGradient}
             >
-              <Text style={styles.buttonText}>
-                {otpLoading ? 'Verifying...' : 'Verify Email'}
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.modalButton]}
+                onPress={handleOtpVerification}
+                disabled={otp.length !== 6 || otpLoading}
+              >
+                <Text style={styles.buttonText}>
+                  {otpLoading ? 'Verifying...' : 'Verify Email'}
+                </Text>
+              </TouchableOpacity>
+            </LinearGradient>
 
             <TouchableOpacity
               style={styles.resendButton}
@@ -564,17 +597,27 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   button: {
-    backgroundColor: '#2575fc',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 4,
+    marginBottom: 4,
+    width: '100%',
+  },
+  buttonGradient: {
+    borderRadius: 12,
+    shadowColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.6,
+    shadowRadius: 24,
+    elevation: 8,
     marginBottom: 16,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
+    letterSpacing: 0.3,
   },
   googleButton: {
     flexDirection: 'row',
@@ -599,7 +642,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   linkContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
   },
   forgotPassword: {
@@ -607,7 +652,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   linkText: {
-    color: '#2575fc',
+    color: '#3b82f6',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -630,7 +675,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modeActive: {
-    backgroundColor: '#2575fc',
+    backgroundColor: '#3b82f6',
   },
   modeText: {
     fontSize: 14,
@@ -674,6 +719,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
     color: '#333',
+  },
+  inputWithSuffix: {
+    marginRight: 40,
   },
   eyeIcon: {
     padding: 4,
@@ -735,7 +783,7 @@ const styles = StyleSheet.create({
   },
   modalEmail: {
     fontWeight: '600',
-    color: '#2575fc',
+    color: '#3b82f6',
   },
   otpInput: {
     borderWidth: 2,
@@ -760,7 +808,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   resendButtonText: {
-    color: '#2575fc',
+    color: '#3b82f6',
     fontSize: 14,
     fontWeight: '500',
   },
@@ -782,13 +830,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#fff',
+    color: '#1e293b',
   },
   backButton: {
     marginBottom: 8,
   },
   backButtonText: {
-    color: '#2575fc',
+    color: '#3b82f6',
     fontSize: 16,
     fontWeight: '500',
   },

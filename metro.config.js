@@ -12,7 +12,7 @@ const config = {
   },
   resolver: {
     sourceExts: ['js', 'jsx', 'ts', 'tsx', 'scss', 'sass', 'json'],
-    assetExts: ['ttf'],
+    assetExts: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ttf'],
   },
   assets: ['./node_modules/react-native-vector-icons/Fonts'],
 };
