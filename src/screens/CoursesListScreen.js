@@ -87,51 +87,16 @@ const CoursesListScreen = ({ navigation }) => {
     navigation.navigate('CourseDetails', { course, isEnrolled });
   };
 
-  const renderCourseItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.courseCard}
-      onPress={() => handleCoursePress(item)}
-    >
-      <View style={styles.courseHeader}>
-        <Text style={styles.courseTitle} numberOfLines={2}>
-          {item.title || item.name}
-        </Text>
-        <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>{item.category || 'General'}</Text>
-        </View>
-      </View>
-
-      <Text style={styles.courseDescription} numberOfLines={2}>
-        {item.description}
-      </Text>
-
-      <View style={styles.courseDetails}>
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Instructor:</Text>
-          <Text style={styles.detailValue}>{item.instructor || 'TBD'}</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Duration:</Text>
-          <Text style={styles.detailValue}>{item.duration || 'TBD'}</Text>
-        </View>
-      </View>
-
-      <TouchableOpacity
-        style={[
-          styles.enrollButton,
-          enrolledIds.has(item.course_id || item.id) && styles.enrolledButton,
-        ]}
-        onPress={() => handleEnroll(item)}
-        disabled={enrolledIds.has(item.course_id || item.id)}
-      >
-        <Text style={styles.enrollButtonText}>
-          {enrolledIds.has(item.course_id || item.id)
-            ? 'Enrolled'
-            : 'Enroll Now'}
-        </Text>
-      </TouchableOpacity>
-    </TouchableOpacity>
-  );
+  const renderCourseItem = ({ item }) => {
+    const isEnrolledItem = enrolledIds.has(item.course_id || item.id);
+    return (
+      <CourseCard
+        course={item}
+        onPress={handleCoursePress}
+        isEnrolled={isEnrolledItem}
+      />
+    );
+  };
 
   // Handle loading or error states
   if (dashboardStatus === 'loading' || enrolledStatus === 'loading') {
@@ -139,8 +104,7 @@ const CoursesListScreen = ({ navigation }) => {
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content" />
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Courses List</Text>
-          <Text style={styles.headerSubtitle}>Recommended courses</Text>
+          <Text style={styles.headerTitle}>Courses</Text>
         </View>
         <View style={styles.emptyState}>
           <LoadSpinner />
@@ -154,8 +118,7 @@ const CoursesListScreen = ({ navigation }) => {
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content" />
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Courses List</Text>
-          <Text style={styles.headerSubtitle}>Recommended courses</Text>
+          <Text style={styles.headerTitle}>Courses</Text>
         </View>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>

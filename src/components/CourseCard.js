@@ -1,201 +1,201 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-const CourseCard = ({ course, isEnrolled, navState, onPress }) => {
-  const navigation = useNavigation();
+const CourseCard = ({ course, onPress, isEnrolled = false }) => {
+  const hasAIAssistance =
+    course.AI_exists || course.ai_enabled || course.aiAssistance;
 
-  if (!course) return null;
-
-  const handlePress = () => {
+  const handleCardClick = () => {
     if (onPress) {
       onPress(course);
-    } else {
-      // Default navigation to course details with enrollment status
-      navigation.navigate('CourseDetails', {
-        course,
-        isEnrolled: isEnrolled || false,
-      });
     }
   };
 
-  const calculateProgress = () => {
-    // This would come from enrolled data in a real app
-    return course.progress || 0;
+  const handleEnrollClick = () => {
+    if (onPress) {
+      onPress(course);
+    }
   };
 
   return (
     <TouchableOpacity
-      style={styles.courseCard}
-      onPress={handlePress}
+      style={styles.cardContainer}
+      onPress={handleCardClick}
       activeOpacity={0.7}
     >
-      {/* Course Header */}
-      <View style={styles.courseHeader}>
-        <View style={styles.titleContainer}>
-          <Text style={styles.courseTitle} numberOfLines={2}>
-            {course.title?.trim() || course.name?.trim() || 'Untitled Course'}
-          </Text>
-          <View
-            style={[
-              styles.statusBadge,
-              isEnrolled ? styles.enrolledBadge : styles.availableBadge,
-            ]}
-          >
-            <Text style={styles.statusText}>
-              {isEnrolled ? 'Enrolled' : 'Available'}
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Course Description */}
-      <Text style={styles.courseDescription} numberOfLines={2}>
-        {course.description?.trim() || 'No description available'}
-      </Text>
-
-      {/* Course Details */}
-      <View style={styles.courseDetails}>
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Instructor:</Text>
-          <Text style={styles.detailValue}>
-            {course.instructor?.trim() || 'Unknown'}
-          </Text>
-        </View>
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Duration:</Text>
-          <Text style={styles.detailValue}>
-            {course.duration?.trim() || 'N/A'}
-          </Text>
-        </View>
-      </View>
-
-      {/* Progress Bar for Enrolled Courses */}
-      {isEnrolled && (
-        <View style={styles.progressContainer}>
-          <Text style={styles.progressLabel}>
-            Progress: {calculateProgress()}%
-          </Text>
-          <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${calculateProgress()}%` },
-              ]}
-            />
-          </View>
-        </View>
-      )}
-
-      {/* Category Badge */}
-      {course.category && (
+      <View style={styles.imageContainer}>
+        <Image
+          source={{
+            uri: course.thumbnail || 'https://via.placeholder.com/300x200',
+          }}
+          style={styles.courseImage}
+          resizeMode="cover"
+        />
         <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>{course.category}</Text>
+          <Text style={styles.categoryText}>
+            {course.tags && course.tags.length > 0
+              ? course.tags[0]
+              : course.category || 'Uncategorized'}
+          </Text>
         </View>
-      )}
+        {hasAIAssistance && (
+          <View style={styles.aiBadge}>
+            <MaterialIcons name="smart-toy" size={12} color="#fff" />
+            <Text style={styles.aiBadgeText}>AI Tutor</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.content}>
+        <View style={styles.metaSection}>
+          <View style={styles.authorSection}>
+            <Text style={styles.byText}>By</Text>
+            <Text style={styles.author}>Yotta Academy</Text>
+          </View>
+        </View>
+
+        <Text style={styles.title} numberOfLines={1}>
+          {course.title || course.name}
+        </Text>
+
+        <Text style={styles.description} numberOfLines={2}>
+          {course.description}
+        </Text>
+
+        <TouchableOpacity
+          style={[styles.enrollButton, isEnrolled && styles.enrolledButton]}
+          onPress={handleEnrollClick}
+        >
+          <Text style={styles.enrollButtonText}>
+            {isEnrolled ? 'Enrolled' : 'Enroll Now'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  courseCard: {
+  cardContainer: {
+    width: '100%',
+    maxWidth: 350,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  courseHeader: {
-    marginBottom: 8,
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  courseTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    flex: 1,
-    marginRight: 12,
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  enrolledBadge: {
-    backgroundColor: '#28a745',
-  },
-  availableBadge: {
-    backgroundColor: '#6c757d',
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  courseDescription: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  courseDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  detailItem: {
-    flex: 1,
-  },
-  detailLabel: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: '500',
-  },
-  detailValue: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  progressContainer: {
-    marginTop: 8,
-  },
-  progressLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: '#e9ecef',
-    borderRadius: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+    marginBottom: 16,
     overflow: 'hidden',
   },
-  progressFill: {
+  imageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 162,
+  },
+  courseImage: {
+    width: '100%',
     height: '100%',
-    backgroundColor: '#2575fc',
-    borderRadius: 3,
+    resizeMode: 'cover',
   },
   categoryBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#2575fc',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginTop: 8,
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 4,
   },
   categoryText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#19213D',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  aiBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: '#8b5cf6',
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  aiBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
     color: '#fff',
-    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  content: {
+    padding: 16,
+    flex: 1,
+  },
+  metaSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  authorSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  byText: {
+    fontSize: 11,
+    color: '#6b7280',
+    fontWeight: '400',
+  },
+  author: {
+    fontSize: 11,
+    color: '#6b7280',
+    fontWeight: '400',
+  },
+  title: {
+    fontSize: 15,
     fontWeight: '500',
+    color: '#19213D',
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  description: {
+    fontSize: 12,
+    color: '#6b7280',
+    lineHeight: 15,
+    marginBottom: 16,
+  },
+  enrollButton: {
+    width: '100%',
+    height: 40,
+    backgroundColor: '#2b7af5',
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 'auto',
+  },
+  enrolledButton: {
+    backgroundColor: '#3fbeab',
+  },
+  enrollButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 
