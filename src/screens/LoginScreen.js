@@ -96,6 +96,8 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const handleSignup = async () => {
+    Keyboard.dismiss(); // Dismiss keyboard before processing
+
     if (!name || !email || !password) {
       Alert.alert('Error', 'Please fill all fields');
       return;
@@ -116,6 +118,8 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const handleSendResetCode = async () => {
+    Keyboard.dismiss(); // Dismiss keyboard before processing
+
     if (!email) {
       Alert.alert('Error', 'Please enter your email');
       return;
@@ -135,6 +139,8 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const handleResetPassword = async () => {
+    Keyboard.dismiss(); // Dismiss keyboard before processing
+
     if (!resetCode || !newPassword) {
       Alert.alert('Error', 'Please fill all fields');
       return;
