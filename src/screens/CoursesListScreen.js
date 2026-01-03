@@ -7,6 +7,7 @@ import {
   StatusBar,
   TouchableOpacity,
 } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllCourses } from '../shared/store/redux/slices/dashboardSlice';
@@ -38,6 +39,7 @@ const CoursesListScreen = ({ navigation }) => {
 
   const [filteredCourses, setFilteredCourses] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
   const pageSize = 10;
 
@@ -185,17 +187,7 @@ const CoursesListScreen = ({ navigation }) => {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Courses List</Text>
-        <Text style={styles.headerSubtitle}>Recommended courses</Text>
-      </View>
-
-      {/* Course Filter */}
-      <View style={styles.filterContainer}>
-        <CourseFilter
-          courses={allCourses}
-          status={dashboardStatus}
-          onFilterChange={handleFilterChange}
-        />
+        <Text style={styles.headerTitle}>Courses</Text>
       </View>
 
       {/* Courses Grid */}
@@ -226,6 +218,23 @@ const CoursesListScreen = ({ navigation }) => {
           />
         </View>
       )}
+
+      {/* Floating Filter Button */}
+      <TouchableOpacity
+        style={styles.floatingButton}
+        onPress={() => setIsFilterModalVisible(true)}
+      >
+        <MaterialIcons name="filter" size={24} color="#fff" />
+      </TouchableOpacity>
+
+      {/* Course Filter Modal */}
+      <CourseFilter
+        courses={allCourses}
+        status={dashboardStatus}
+        onFilterChange={handleFilterChange}
+        isModalVisible={isFilterModalVisible}
+        onModalClose={() => setIsFilterModalVisible(false)}
+      />
     </SafeAreaView>
   );
 };
@@ -376,6 +385,22 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#3b82f6',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });
 

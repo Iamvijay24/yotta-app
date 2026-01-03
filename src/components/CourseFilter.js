@@ -9,8 +9,13 @@ import {
   TextInput,
 } from 'react-native';
 
-const CourseFilter = ({ courses, status, onFilterChange }) => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
+const CourseFilter = ({
+  courses,
+  status,
+  onFilterChange,
+  isModalVisible,
+  onModalClose,
+}) => {
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('name');
@@ -71,145 +76,113 @@ const CourseFilter = ({ courses, status, onFilterChange }) => {
   const hasActiveFilters = searchText || selectedCategory || sortBy !== 'name';
 
   return (
-    <View style={styles.container}>
-      {/* Filter Button */}
-      <TouchableOpacity
-        style={[
-          styles.filterButton,
-          hasActiveFilters && styles.activeFilterButton,
-        ]}
-        onPress={() => setIsModalVisible(true)}
-      >
-        <Text
-          style={[
-            styles.filterButtonText,
-            hasActiveFilters && styles.activeFilterText,
-          ]}
-        >
-          Filter & Sort {hasActiveFilters ? `(${courses?.length || 0})` : ''}
-        </Text>
-      </TouchableOpacity>
+    <Modal
+      visible={isModalVisible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onModalClose}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>Filter & Sort Courses</Text>
+          <TouchableOpacity style={styles.closeButton} onPress={onModalClose}>
+            <Text style={styles.closeButtonText}>Done</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Modal */}
-      <Modal
-        visible={isModalVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          {/* Header */}
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Filter & Sort Courses</Text>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setIsModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Done</Text>
-            </TouchableOpacity>
+        <ScrollView
+          style={styles.modalContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Search</Text>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search courses, instructors..."
+              value={searchText}
+              onChangeText={setSearchText}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
           </View>
 
-          <ScrollView
-            style={styles.modalContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Search */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Search</Text>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Search courses, instructors..."
-                value={searchText}
-                onChangeText={setSearchText}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
-
-            {/* Category Filter */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Category</Text>
-              <View style={styles.categoryContainer}>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Category</Text>
+            <View style={styles.categoryContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.categoryButton,
+                  !selectedCategory && styles.selectedCategory,
+                ]}
+                onPress={() => setSelectedCategory('')}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    !selectedCategory && styles.selectedCategoryText,
+                  ]}
+                >
+                  All Categories
+                </Text>
+              </TouchableOpacity>
+              {categories.map(category => (
                 <TouchableOpacity
+                  key={category}
                   style={[
                     styles.categoryButton,
-                    !selectedCategory && styles.selectedCategory,
+                    selectedCategory === category && styles.selectedCategory,
                   ]}
-                  onPress={() => setSelectedCategory('')}
+                  onPress={() => setSelectedCategory(category)}
                 >
                   <Text
                     style={[
                       styles.categoryText,
-                      !selectedCategory && styles.selectedCategoryText,
+                      selectedCategory === category &&
+                        styles.selectedCategoryText,
                     ]}
                   >
-                    All Categories
-                  </Text>
-                </TouchableOpacity>
-                {categories.map(category => (
-                  <TouchableOpacity
-                    key={category}
-                    style={[
-                      styles.categoryButton,
-                      selectedCategory === category && styles.selectedCategory,
-                    ]}
-                    onPress={() => setSelectedCategory(category)}
-                  >
-                    <Text
-                      style={[
-                        styles.categoryText,
-                        selectedCategory === category &&
-                          styles.selectedCategoryText,
-                      ]}
-                    >
-                      {category}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            {/* Sort Options */}
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Sort By</Text>
-              {[
-                { value: 'name', label: 'Course Name' },
-                { value: 'instructor', label: 'Instructor' },
-                { value: 'duration', label: 'Duration' },
-              ].map(option => (
-                <TouchableOpacity
-                  key={option.value}
-                  style={[
-                    styles.sortOption,
-                    sortBy === option.value && styles.selectedSortOption,
-                  ]}
-                  onPress={() => setSortBy(option.value)}
-                >
-                  <Text
-                    style={[
-                      styles.sortText,
-                      sortBy === option.value && styles.selectedSortText,
-                    ]}
-                  >
-                    {option.label}
+                    {category}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
+          </View>
 
-            {/* Clear Filters */}
-            {hasActiveFilters && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Sort By</Text>
+            {[
+              { value: 'name', label: 'Course Name' },
+              { value: 'instructor', label: 'Instructor' },
+              { value: 'duration', label: 'Duration' },
+            ].map(option => (
               <TouchableOpacity
-                style={styles.clearButton}
-                onPress={clearFilters}
+                key={option.value}
+                style={[
+                  styles.sortOption,
+                  sortBy === option.value && styles.selectedSortOption,
+                ]}
+                onPress={() => setSortBy(option.value)}
               >
-                <Text style={styles.clearButtonText}>Clear All Filters</Text>
+                <Text
+                  style={[
+                    styles.sortText,
+                    sortBy === option.value && styles.selectedSortText,
+                  ]}
+                >
+                  {option.label}
+                </Text>
               </TouchableOpacity>
-            )}
-          </ScrollView>
-        </View>
-      </Modal>
-    </View>
+            ))}
+          </View>
+
+          {hasActiveFilters && (
+            <TouchableOpacity style={styles.clearButton} onPress={clearFilters}>
+              <Text style={styles.clearButtonText}>Clear All Filters</Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+      </View>
+    </Modal>
   );
 };
 

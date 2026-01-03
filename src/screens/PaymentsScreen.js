@@ -20,7 +20,7 @@ const PaymentsScreen = ({ navigation, route }) => {
       [
         {
           text: 'OK',
-          onPress: () => navigation.navigate('Courses List'),
+          onPress: () => navigation.navigate('Courses'),
         },
       ],
     );
