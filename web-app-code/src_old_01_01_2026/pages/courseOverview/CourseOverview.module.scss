@@ -1,0 +1,347 @@
+:root {
+  --background: #FFFFFF;
+  --background-secondary: #f8fafc;
+  --background-tertiary: #f9fafb;
+  --background-muted: #F8F8F8;
+  --surface: #FFFFFF;
+  --surface-hover: #f8f9fa;
+  --surface-gray: #f9fafb;
+  --border: #e5e7eb;
+  --border-light: #F0F2F5;
+  --border-dark: #d1d5db;
+  --border-hover: #e0e0e0;
+  --border-filter: #E3E6EA;
+  --text-primary: #19213D;
+  --text-secondary: #323A57;
+  --text-tertiary: #565C72;
+  --text-muted: #6b7280;
+  --text-light: #8A91A8;
+  --text-lighter: #93989A;
+  --text-very-light: #666f8d;
+  --text-rating: #1f2937;
+  --text-header: #36394A;
+  --primary: #2388ff;
+  --primary-hover: #1d6fd8;
+  --primary-light: #60a5fa;
+  --primary-dark: #1c55ff;
+  --secondary: #2b7af5;
+  --secondary-hover: #2563eb;
+  --success: #3fbeab;
+  --success-hover: #34c9a7;
+  --success-light: #a8fdf0ff;
+  --warning: #fbbf24;
+  --error: #ef4444;
+  --info: #3b82f6;
+  --star: #FFA500;
+  --star-yellow: #fbbf24;
+  --stat-blue: #a9c7f7ff;
+  --stat-purple: #cab5fbff;
+  --stat-yellow: #fce0afff;
+  --stat-teal: #a8fdf0ff;
+  --icon-primary: #323A57;
+  --icon-secondary: #565C72;
+  --font-family: 'Inter', sans-serif;
+  --font-weight-extra-light: 200;
+  --font-weight-light: 400;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semi-bold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extra-bold: 800;
+  --font-size-xxs: 10px;
+  --font-size-xs: 11px;
+  --font-size-stat-label: 12.5px;
+  --font-size-sm: 12px;
+  --font-size-base: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 15px;
+  --font-size-xl: 16px;
+  --font-size-2xl: 18px;
+  --font-size-3xl: 19px;
+  --font-size-4xl: 20px;
+  --font-size-5xl: 22px;
+  --font-size-h1: 28px;
+  --font-size-h2: 24px;
+  --line-height-tight: 130%;
+  --line-height-normal: 140%;
+  --line-height-relaxed: 150%;
+  --letter-spacing-small: 0.5px;
+  --shadow-card-base: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 8px 20px rgba(0, 0, 0, 0.12);
+  --shadow-card-recommended: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-button-primary: 0 4px 6px rgba(59, 130, 246, 0.2);
+  --shadow-button-primary-hover: 0 6px 8px rgba(59, 130, 246, 0.3);
+  --shadow-button-enroll: 0 4px 12px rgba(43, 122, 251, 0.4);
+  --shadow-button-success: 0 4px 12px rgba(63, 190, 171, 0.4);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-small: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-full: 50%;
+  --gap-xs: 2px;
+  --gap-sm: 4px;
+  --gap-md: 8px;
+  --gap-lg: 12px;
+  --gap-xl: 16px;
+  --gap-2xl: 20px;
+  --gap-3xl: 24px;
+  --gap-4xl: 32px;
+  --gap-5xl: 40px;
+  --gap-6xl: 60px;
+  --padding-xs: 3px;
+  --padding-sm: 8px;
+  --padding-md: 16px;
+  --padding-lg: 20px;
+  --padding-xl: 24px;
+  --padding-2xl: 32px;
+  --margin-xs: 4px;
+  --margin-sm: 4px;
+  --margin-md: 16px;
+  --margin-lg: 24px;
+  --margin-xl: 32px;
+  --margin-2xl: 40px;
+  --margin-5xl: 40px;
+  --transition-fast: all 0.15s ease;
+  --transition-base: all 0.3s ease;
+  --transition-slow: all 0.4s ease;
+  --transition-spring: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --breakpoints-xs: 480px;
+  --breakpoints-sm: 640px;
+  --breakpoints-md: 768px;
+  --breakpoints-lg: 1024px;
+  --breakpoints-xl: 1200px;
+  --breakpoints-2xl: 1400px;
+  --breakpoints-wide: 1536px;
+  --button-height-sm: 32px;
+  --button-height-md: 40px;
+  --button-height-lg: 42px;
+  --button-padding-sm: 3px 10px;
+  --button-padding-md: 8px 16px;
+  --button-padding-lg: 12px 24px;
+  --card-max-width: 350px;
+  --card-image-height: 162px;
+  --card-recommended-image-width: 190px;
+  --card-recommended-image-height: 147px;
+  --stat-card-icon-size: 32px;
+  --stat-card-icon-font-size: 16px;
+  --avatar-sm: 20px;
+  --avatar-md: 40px;
+  --avatar-lg: 60px;
+  --course-overview-thumbnail-height: 361px;
+  --course-overview-sidebar-width: 340px;
+  --course-overview-content-width: 693px;
+  --course-overview-stats-container-width: 300px;
+}
+
+.pageContainer {
+  min-height: 100vh;
+  background-color: var(--background);
+  font-family: var(--font-family);
+}
+
+.mainContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px var(--gap-3xl) var(--gap-2xl) var(--gap-3xl);
+  @media (max-width: var(--breakpoints-md)) {
+    padding: var(--gap-2xl) var(--padding-md);
+  }
+}
+
+.contentGrid {
+  display: flex;
+  gap: var(--gap-6xl);
+  margin-top: var(--margin-2xl);
+  @media (max-width: 968px) {
+    flex-direction: column;
+  }
+}
+
+.leftCol {
+  width: var(--course-overview-content-width);
+  order: -1;
+}
+
+.rightCol {
+  width: var(--course-overview-sidebar-width);
+  flex-shrink: 0;
+  @media (max-width: 968px) {
+    width: 100%;
+    margin-bottom: var(--margin-2xl);
+  }
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.styledVideoThumbnail {
+  width: auto;
+  height: var(--course-overview-thumbnail-height);
+  background: #f0f0f0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: var(--gap-2xl);
+  position: relative;
+  cursor: pointer;
+  transition: var(--transition-base);
+  &:hover {
+    transform: scale(1.02);
+  }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.tocSection {
+  border-radius: var(--radius-xl);
+  padding: 0 var(--gap-3xl);
+}
+
+.tocHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--gap-2xl);
+}
+
+.tocTitle {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-regular);
+    font-size: var(--font-size-lg);
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 0 !important;
+}
+
+.totalLessonsText {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-lg);
+    color: var(--text-light);
+}
+
+.collapse {
+  &.ant-collapse {
+    border-radius: var(--radius-md);
+    background: var(--background-muted);
+    border: none !important;
+    .ant-collapse-item {
+      border: none !important;
+      border-radius: var(--radius-md);
+      margin-bottom: var(--padding-sm);
+      overflow: hidden;
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    .ant-collapse-header {
+      padding: var(--padding-sm) var(--font-size-sm) !important;
+      font-family: var(--font-family);
+      font-weight: var(--font-weight-medium);
+      font-size: var(--font-size-lg);
+      color: var(--text-secondary);
+      background: transparent !important;
+      border: none !important;
+      &:hover {
+        background: var(--background-secondary);
+      }
+    }
+    .ant-collapse-content {
+      background: transparent !important;
+      border: none !important;
+    }
+    .ant-collapse-content-box {
+      padding: 0 !important;
+    }
+  }
+}
+
+.sectionPanel {
+  .ant-collapse-header {
+    background: transparent;
+  }
+}
+
+.lessonList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lessonItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--padding-sm) var(--gap-xl);
+  &:hover {
+    background: var(--surface-hover);
+  }
+}
+
+.lessonContent {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+  flex: 1;
+}
+
+.lessonName {
+  &.ant-typography {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-light);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-relaxed);
+    color: var(--text-tertiary);
+  }
+}
+
+.lessonDuration {
+  &.ant-typography {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-light);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-relaxed);
+    color: var(--text-tertiary);
+  }
+}
+
+.emptyLessons {
+  padding: var(--gap-xl);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-size-md);
+}
+
+.durationsLoading {
+  margin-top: var(--padding-sm);
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.expandIcon {
+  &.rotated {
+    transform: rotate(180deg);
+  }
+}
+
+.icon {
+  font-size: var(--font-size-base);
+  color: var(--icon-secondary);
+}
+
+.tocIcon {
+  font-size: 13px;
+  color: #565C72;
+}
+
