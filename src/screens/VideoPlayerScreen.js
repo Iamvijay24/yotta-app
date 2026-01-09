@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAuth } from '../shared/api/AuthContext';
 import Slider from '@react-native-community/slider';
+import { VideoControls } from '../components/VideoControls';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -43,6 +44,7 @@ const VideoPlayerScreen = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [volume, setVolume] = useState(1.0);
   const [isMuted, setIsMuted] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
 
   // Auto-hide controls timer
   const controlsTimerRef = useRef(null);
@@ -50,26 +52,28 @@ const VideoPlayerScreen = () => {
   // Current topic data
   const currentTopicData = currentTopic || allTopics[currentTopicIndex];
 
-  // Reset controls visibility
-  const resetControlsTimer = useCallback(() => {
+  // Show controls when pressing/hovering
+  const showControlsOnPress = useCallback(() => {
     if (controlsTimerRef.current) {
       clearTimeout(controlsTimerRef.current);
     }
     setShowControls(true);
-    controlsTimerRef.current = setTimeout(() => {
-      setShowControls(false);
-    }, 3000);
+  }, []);
+
+  // Hide controls when clicking again
+  const hideControlsOnPress = useCallback(() => {
+    setShowControls(false);
+    if (controlsTimerRef.current) {
+      clearTimeout(controlsTimerRef.current);
+    }
   }, []);
 
   // Video event handlers
-  const onLoad = useCallback(
-    data => {
-      setDuration(data.duration);
-      setIsLoading(false);
-      resetControlsTimer();
-    },
-    [resetControlsTimer],
-  );
+  const onLoad = useCallback(data => {
+    setDuration(data.duration);
+    setIsLoading(false);
+    setShowControls(true); // Show controls when video loads
+  }, []);
 
   const onProgress = useCallback(data => {
     setCurrentTime(data.currentTime);
@@ -87,33 +91,47 @@ const VideoPlayerScreen = () => {
   // Control handlers
   const togglePlayPause = useCallback(() => {
     setIsPlaying(!isPlaying);
-    resetControlsTimer();
-  }, [isPlaying, resetControlsTimer]);
+    showControlsOnPress();
+  }, [isPlaying, showControlsOnPress]);
 
   const onSeek = useCallback(
     value => {
       videoRef.current?.seek(value);
-      resetControlsTimer();
+      showControlsOnPress();
     },
-    [resetControlsTimer],
+    [showControlsOnPress],
   );
 
   const toggleMute = useCallback(() => {
     setIsMuted(!isMuted);
-    resetControlsTimer();
-  }, [isMuted, resetControlsTimer]);
+    showControlsOnPress();
+  }, [isMuted, showControlsOnPress]);
 
   const skipForward = useCallback(() => {
     const newTime = Math.min(currentTime + 10, duration);
     videoRef.current?.seek(newTime);
-    resetControlsTimer();
-  }, [currentTime, duration, resetControlsTimer]);
+    showControlsOnPress();
+  }, [currentTime, duration, showControlsOnPress]);
 
   const skipBackward = useCallback(() => {
     const newTime = Math.max(currentTime - 10, 0);
     videoRef.current?.seek(newTime);
-    resetControlsTimer();
-  }, [currentTime, resetControlsTimer]);
+    showControlsOnPress();
+  }, [currentTime, showControlsOnPress]);
+
+  const handleSpeedChange = useCallback(
+    speed => {
+      setPlaybackSpeed(speed);
+      showControlsOnPress();
+    },
+    [showControlsOnPress],
+  );
+
+  const handleAiTutor = useCallback(() => {
+    // TODO: Implement AI tutor functionality
+    Alert.alert('AI Tutor', 'AI tutor feature not implemented yet');
+    showControlsOnPress();
+  }, [showControlsOnPress]);
 
   // Navigation handlers
   const goToPreviousTopic = useCallback(() => {
@@ -147,6 +165,18 @@ const VideoPlayerScreen = () => {
   // Progress percentage
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+  // Helper functions for VideoControls
+  const getQualityLabel = useCallback(level => {
+    return level?.height
+      ? `${level.height}p`
+      : `${Math.round((level?.bitrate || 0) / 1000)}kbps`;
+  }, []);
+
+  const getPopupContainer = useCallback(
+    () => videoRef.current?.parentNode || document.body,
+    [],
+  );
+
   // Cleanup timer on unmount
   useEffect(() => {
     return () => {
@@ -156,17 +186,26 @@ const VideoPlayerScreen = () => {
     };
   }, []);
 
+  // Show controls when topic changes
+  useEffect(() => {
+    setShowControls(true);
+  }, [currentTopicIndex]);
+
+  // Keep controls visible when video is paused
+  useEffect(() => {
+    if (!isPlaying && !isLoading) {
+      setShowControls(true);
+    }
+  }, [isPlaying, isLoading]);
+
   // Handle screen tap to show/hide controls
   const handleScreenTap = useCallback(() => {
     if (showControls) {
-      setShowControls(false);
-      if (controlsTimerRef.current) {
-        clearTimeout(controlsTimerRef.current);
-      }
+      hideControlsOnPress();
     } else {
-      resetControlsTimer();
+      showControlsOnPress();
     }
-  }, [showControls, resetControlsTimer]);
+  }, [showControls, hideControlsOnPress, showControlsOnPress]);
 
   if (!currentTopicData) {
     return (
@@ -225,6 +264,16 @@ const VideoPlayerScreen = () => {
           style={styles.videoTouchable}
           activeOpacity={1}
           onPress={handleScreenTap}
+          onPressIn={() => {
+            setShowControls(true);
+            if (controlsTimerRef.current) {
+              clearTimeout(controlsTimerRef.current);
+            }
+          }}
+          onPressOut={() => {
+            // Keep controls visible when hovering/pressing
+            // Controls will only hide when user taps again
+          }}
         >
           <Video
             ref={videoRef}
@@ -234,6 +283,7 @@ const VideoPlayerScreen = () => {
             style={styles.video}
             paused={!isPlaying}
             volume={isMuted ? 0 : volume}
+            rate={playbackSpeed}
             resizeMode="contain"
             onLoad={onLoad}
             onProgress={onProgress}
@@ -262,81 +312,38 @@ const VideoPlayerScreen = () => {
             </View>
           )}
 
-          {/* Controls overlay */}
-          {showControls && !isLoading && (
-            <View style={styles.controlsOverlay}>
-              {/* Top controls */}
-              <View style={styles.topControls}>
-                <TouchableOpacity
-                  style={styles.controlButton}
-                  onPress={() => setIsFullscreen(!isFullscreen)}
-                >
-                  <Icon
-                    name={isFullscreen ? 'fullscreen-exit' : 'fullscreen'}
-                    size={24}
-                    color="#fff"
-                  />
-                </TouchableOpacity>
-              </View>
-
-              {/* Center play/pause */}
-              <View style={styles.centerControls}>
-                <TouchableOpacity
-                  style={styles.skipButton}
-                  onPress={skipBackward}
-                >
-                  <Icon name="replay-10" size={32} color="#fff" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.playButton}
-                  onPress={togglePlayPause}
-                >
-                  <Icon
-                    name={isPlaying ? 'pause' : 'play-arrow'}
-                    size={48}
-                    color="#fff"
-                  />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.skipButton}
-                  onPress={skipForward}
-                >
-                  <Icon name="forward-10" size={32} color="#fff" />
-                </TouchableOpacity>
-              </View>
-
-              {/* Bottom controls */}
-              <View style={styles.bottomControls}>
-                <Text style={styles.timeText}>{formatTime(currentTime)}</Text>
-
-                <Slider
-                  style={styles.progressBar}
-                  minimumValue={0}
-                  maximumValue={duration}
-                  value={currentTime}
-                  onValueChange={onSeek}
-                  minimumTrackTintColor="#2575fc"
-                  maximumTrackTintColor="#fff"
-                  thumbStyle={styles.sliderThumb}
-                />
-
-                <Text style={styles.timeText}>{formatTime(duration)}</Text>
-
-                <TouchableOpacity
-                  style={styles.controlButton}
-                  onPress={toggleMute}
-                >
-                  <Icon
-                    name={isMuted ? 'volume-off' : 'volume-up'}
-                    size={20}
-                    color="#fff"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
+          {/* Video Controls */}
+          <VideoControls
+            show={showControls && !isLoading}
+            isPlaying={isPlaying}
+            currentTime={currentTime}
+            duration={duration}
+            volume={volume}
+            isMuted={isMuted}
+            playbackSpeed={playbackSpeed}
+            progressPercent={progressPercentage}
+            levels={[]} // TODO: Add HLS levels if available
+            currentLevel={-1}
+            onTogglePlay={togglePlayPause}
+            onSeek={onSeek}
+            onProgressClick={e => {
+              // For React Native, handle progress click differently
+              // This would need to be implemented based on touch coordinates
+            }}
+            onToggleMute={toggleMute}
+            onVolumeChange={setVolume}
+            onSpeedChange={handleSpeedChange}
+            onQualityChange={() => {}} // TODO: Implement quality change
+            onFullScreen={() => setIsFullscreen(!isFullscreen)}
+            onSkipForward={skipForward}
+            onSkipBackward={skipBackward}
+            onAiTutor={handleAiTutor}
+            aiTutorLoading={false}
+            hasAIAssistance={true} // Enable AI assistance
+            formatTime={formatTime}
+            getQualityLabel={getQualityLabel}
+            getPopupContainer={getPopupContainer}
+          />
         </TouchableOpacity>
       </View>
 
@@ -526,7 +533,11 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.7)',
@@ -537,7 +548,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   bufferingOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -548,7 +563,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   controlsOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'space-between',
     padding: 16,
   },

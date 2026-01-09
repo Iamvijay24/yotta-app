@@ -55,7 +55,24 @@ const TabStack = () => (
           iconName = 'person';
         }
 
-        return <Icon name={iconName} size={size} color={color} />;
+        // Fallback to default icons if the named icon fails to load
+        try {
+          return <Icon name={iconName} size={size} color={color} />;
+        } catch (error) {
+          // Fallback icons
+          const fallbackIcons = {
+            Courses: 'menu-book',
+            'My Progress': 'trending-up',
+            Account: 'account-circle',
+          };
+          return (
+            <Icon
+              name={fallbackIcons[route.name] || 'help'}
+              size={size}
+              color={color}
+            />
+          );
+        }
       },
     })}
   >

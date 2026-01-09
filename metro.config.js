@@ -12,9 +12,8 @@ const config = {
   },
   resolver: {
     sourceExts: ['js', 'jsx', 'ts', 'tsx', 'scss', 'sass', 'json'],
-    assetExts: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ttf'],
+    assetExts: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'ttf', 'otf'],
   },
-  assets: ['./node_modules/react-native-vector-icons/Fonts'],
 };
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);
