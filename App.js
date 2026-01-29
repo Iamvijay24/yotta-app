@@ -4,6 +4,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Provider } from 'react-redux';
 import { store } from './src/shared/store/redux/store';
 import { AuthProvider, useAuth } from './src/shared/api/AuthContext';
+import { StripeProvider } from '@stripe/stripe-react-native';
+import { STRIPE_CONFIG } from './src/config/stripe';
 import AppNavigator from './src/navigation/AppNavigator';
 import './src/styles/global.scss';
 
@@ -25,10 +27,15 @@ function App() {
   return (
     <Provider store={store}>
       <SafeAreaProvider>
-        <AuthProvider>
-          <StatusBar barStyle="dark-content" />
-          <AuthWrapper />
-        </AuthProvider>
+        <StripeProvider
+          publishableKey={STRIPE_CONFIG.publishableKey}
+          merchantIdentifier={STRIPE_CONFIG.merchantIdentifier}
+        >
+          <AuthProvider>
+            <StatusBar barStyle="dark-content" />
+            <AuthWrapper />
+          </AuthProvider>
+        </StripeProvider>
       </SafeAreaProvider>
     </Provider>
   );

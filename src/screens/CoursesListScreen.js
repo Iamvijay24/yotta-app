@@ -150,7 +150,25 @@ const CoursesListScreen = ({ navigation }) => {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Courses</Text>
+        <View style={styles.headerContent}>
+          <View style={styles.headerIcons}>
+            <TouchableOpacity
+              style={styles.headerIcon}
+              onPress={() => navigation.navigate('Account')}
+            >
+              <AntDesign name="user" size={24} color="#666" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerIcon}
+              onPress={() => {
+                // Handle notifications - you can implement notification screen navigation
+                console.log('Notifications pressed');
+              }}
+            >
+              <AntDesign name="bells" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       {/* Courses Grid */}
@@ -208,10 +226,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f7fa',
   },
   header: {
-    backgroundColor: '#2575fc',
+    backgroundColor: '#fff',
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
     paddingTop: 50,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e5e9',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerIcon: {
+    marginLeft: 15,
+    padding: 5,
   },
   headerTitle: {
     fontSize: 24,

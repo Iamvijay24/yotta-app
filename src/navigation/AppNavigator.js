@@ -11,6 +11,7 @@ import AccountScreen from '../screens/AccountScreen';
 import CourseDetailsScreen from '../screens/CourseDetailsScreen';
 import VideoPlayerScreen from '../screens/VideoPlayerScreen';
 import PaymentsScreen from '../screens/PaymentsScreen';
+import PaymentSuccessScreen from '../screens/PaymentSuccessScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -88,6 +89,7 @@ const MainNavigator = () => (
     <Stack.Screen name="CourseDetails" component={CourseDetailsScreen} />
     <Stack.Screen name="VideoPlayer" component={VideoPlayerScreen} />
     <Stack.Screen name="Payments" component={PaymentsScreen} />
+    <Stack.Screen name="PaymentSuccess" component={PaymentSuccessScreen} />
   </Stack.Navigator>
 );
 

@@ -17,11 +17,42 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../shared/api/AuthContext';
 import { PaymentAPI } from '../services/payment.services';
 import { DashboardAPI } from '../services/dashboard.services';
+import StripePayment from '../components/StripePayment';
 import course_overview from '../components/data/course_overview';
 
 const CourseDetailsScreen = ({ navigation, route }) => {
-  const { course, isEnrolled = false } = route.params;
+  const { course, isEnrolled = false } = route.params || {};
   const { user, isAuthenticated } = useAuth();
+
+  // Early return if no course data
+  if (!course) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" />
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Icon name="arrow-back" size={24} color="#666" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Course Details</Text>
+        </View>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Course not found</Text>
+          <Text style={styles.errorSubtext}>
+            Unable to load course information
+          </Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.retryButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
   const [enrollLoading, setEnrollLoading] = useState(false);
   const [expandedLessons, setExpandedLessons] = useState(new Set());
   const [courseData, setCourseData] = useState(null);
@@ -100,17 +131,17 @@ const CourseDetailsScreen = ({ navigation, route }) => {
     return null;
   };
 
-  // Resolve data with fallback
+  // Resolve data with fallback - ensure we always have a valid structure
   const resolvedCourseData = useMemo(() => {
     let rawStructure = courseData;
-    const hasError = !!error;
-    // Use fallback data if API fails
-    if (!rawStructure && hasError) {
+
+    // If no courseData, provide fallback data regardless of error state
+    if (!rawStructure) {
       rawStructure = {
         course: {
-          title: course_overview.title,
-          description: course_overview.description,
-          thumbnail: course_overview.thumbnail,
+          title: course?.title || course_overview.title,
+          description: course?.description || course_overview.description,
+          thumbnail: course?.thumbnail || course_overview.thumbnail,
           overall_lessons: course_overview.total_lessons,
           students: course_overview.students,
           rating: course_overview.rating,
@@ -126,8 +157,18 @@ const CourseDetailsScreen = ({ navigation, route }) => {
         structure: course_overview.modules,
       };
     }
+
+    // Ensure the structure always has required properties
+    if (!rawStructure.course) {
+      rawStructure.course = {
+        title: course?.title || 'Course Details',
+        description: 'No description available',
+        thumbnail: course_overview.thumbnail,
+      };
+    }
+
     return rawStructure;
-  }, [courseData, error]);
+  }, [courseData, error, course]);
 
   // Fetch course structure on component mount
   useEffect(() => {
@@ -197,35 +238,42 @@ const CourseDetailsScreen = ({ navigation, route }) => {
       navigation.navigate('Login');
       return;
     }
-    if (!resolvedCourseData.course.offerPrice) {
-      Alert.alert('Error', 'Course price information is missing');
-      return;
-    }
+
     setEnrollLoading(true);
     try {
-      const userId = user?.sub || user?.['cognito:username'];
+      const courseId =
+        resolvedCourseData.course.course_id || resolvedCourseData.course.id;
       const payload = {
-        payment_plan: resolvedCourseData.course.offerPrice,
-        user_id: userId,
-        course_id: resolvedCourseData.course.course_id,
-        success_url: '', // Not needed for mobile, can be empty or add dummy
-        cancel_url: '', // Not needed for mobile
+        payment_plan: resolvedCourseData.course.offerPrice || '400',
+        course_id: courseId,
+        coupon_code: couponCode || null,
+        success_url: '', // Mobile app doesn't need redirect URLs
+        cancel_url: '', // Mobile app doesn't need redirect URLs
       };
-      const response = await PaymentAPI.purchaseCourse(payload);
-      console.log(response);
 
-      const { data } = response;
+      const { data } = await PaymentAPI.purchaseCourse(payload);
+
+      // Check if 100% discount - show payment status component
+      if (data?.discount_percent === 100) {
+        // Refresh enrolled courses to update UI state
+        // dispatch(fetchEnrolledCourses()); // Would need to import dispatch
+        Alert.alert(
+          'Success!',
+          'Course enrolled successfully with 100% discount!',
+        );
+        return;
+      }
+
       if (data?.checkout_url) {
-        // Open external browser for payment
+        // For mobile, we navigate to the Stripe checkout URL
+        // Since it's a mobile app, we use Linking to open in browser
         await Linking.openURL(data.checkout_url);
-        // After payment, user would return to app and we might check payment status
-        // For now, just show success message
         Alert.alert(
           'Payment Initiated',
-          'You will be redirected to complete your payment',
+          'You will be redirected to complete your payment in the browser.',
         );
       } else {
-        throw new Error('No checkout URL returned');
+        throw new Error('No checkout URL returned from backend');
       }
     } catch (err) {
       console.error('Payment error:', err);
@@ -307,8 +355,11 @@ const CourseDetailsScreen = ({ navigation, route }) => {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backButtonText}>← Back</Text>
+            <Icon name="arrow-back" size={24} color="#666" />
           </TouchableOpacity>
+          <Text style={styles.headerTitle}>
+            {course.title || 'Course Details'}
+          </Text>
         </View>
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Loading course details...</Text>
@@ -327,8 +378,11 @@ const CourseDetailsScreen = ({ navigation, route }) => {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backButtonText}>← Back</Text>
+            <Icon name="arrow-back" size={24} color="#666" />
           </TouchableOpacity>
+          <Text style={styles.headerTitle}>
+            {course.title || 'Course Details'}
+          </Text>
         </View>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Failed to load course details</Text>
@@ -360,8 +414,11 @@ const CourseDetailsScreen = ({ navigation, route }) => {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backButtonText}>← Back</Text>
+            <Icon name="arrow-back" size={24} color="#666" />
           </TouchableOpacity>
+          <Text style={styles.headerTitle}>
+            {course.title || 'Course Details'}
+          </Text>
         </View>
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>Course details not available</Text>
@@ -383,8 +440,13 @@ const CourseDetailsScreen = ({ navigation, route }) => {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backButtonText}>← Back</Text>
+            <Icon name="arrow-back" size={24} color="#666" />
           </TouchableOpacity>
+          <Text style={styles.headerTitle}>
+            {resolvedCourseData?.course?.title ||
+              course?.title ||
+              'Course Details'}
+          </Text>
         </View>
 
         <Image
@@ -512,13 +574,13 @@ const CourseDetailsScreen = ({ navigation, route }) => {
             <View style={styles.priceContainer}>
               <View style={styles.priceSection}>
                 <Text style={styles.currentPrice}>
-                  ₹{resolvedCourseData.course.offerPrice}
+                  ${resolvedCourseData.course.offerPrice}
                 </Text>
                 {resolvedCourseData.course.oldPrice &&
                   Number(resolvedCourseData.course.oldPrice) >
                     Number(resolvedCourseData.course.offerPrice) && (
                     <Text style={styles.originalPrice}>
-                      ₹{resolvedCourseData.course.oldPrice}
+                      ${resolvedCourseData.course.oldPrice}
                     </Text>
                   )}
               </View>
@@ -536,13 +598,28 @@ const CourseDetailsScreen = ({ navigation, route }) => {
                   />
                   <TouchableOpacity
                     style={styles.couponButton}
-                    onPress={() => {
+                    onPress={async () => {
                       if (couponCode.trim()) {
-                        Alert.alert(
-                          'Coupon Applied',
-                          `Coupon "${couponCode}" applied successfully!`,
-                        );
-                        setCouponCode('');
+                        try {
+                          // Validate coupon with backend
+                          const validationPayload = {
+                            coupon_code: couponCode.trim(),
+                            course_id:
+                              resolvedCourseData.course.course_id ||
+                              resolvedCourseData.course.id,
+                          };
+
+                          // You can add a coupon validation API call here if your backend supports it
+                          // For now, we'll just show that the coupon is applied
+                          Alert.alert(
+                            'Coupon Applied',
+                            `Coupon "${couponCode}" will be applied during payment.`,
+                          );
+                          // Don't clear the coupon code - keep it for payment
+                        } catch (error) {
+                          Alert.alert('Error', 'Invalid coupon code');
+                          setCouponCode('');
+                        }
                       } else {
                         Alert.alert('Error', 'Please enter a coupon code');
                       }
@@ -551,6 +628,11 @@ const CourseDetailsScreen = ({ navigation, route }) => {
                     <Text style={styles.couponButtonText}>Apply</Text>
                   </TouchableOpacity>
                 </View>
+                {couponCode && (
+                  <Text style={styles.appliedCouponText}>
+                    Applied coupon: {couponCode}
+                  </Text>
+                )}
               </View>
             </View>
           )}
@@ -595,15 +677,24 @@ const CourseDetailsScreen = ({ navigation, route }) => {
             <Text style={styles.enrollButtonText}>Continue Learning</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity
-            style={styles.enrollButton}
-            onPress={handleEnroll}
-            disabled={enrollLoading}
-          >
-            <Text style={styles.enrollButtonText}>
-              {enrollLoading ? 'Processing...' : 'Enroll Now'}
-            </Text>
-          </TouchableOpacity>
+          <StripePayment
+            courseId={
+              resolvedCourseData.course.course_id ||
+              resolvedCourseData?.course?.id
+            }
+            courseData={resolvedCourseData.course}
+            couponCode={couponCode}
+            navigation={navigation}
+            onSuccess={() => {
+              // Handle successful payment
+              Alert.alert('Success', 'Payment completed successfully!');
+              // Optionally navigate to course content or refresh enrolled courses
+            }}
+            onCancel={() => {
+              // Handle payment cancellation
+              console.log('Payment cancelled');
+            }}
+          />
         )}
       </View>
     </SafeAreaView>
@@ -622,17 +713,25 @@ const styles = StyleSheet.create({
     paddingBottom: 120, // Space for footer
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 10,
-    backgroundColor: '#2575fc',
+    paddingVertical: 12,
+    paddingTop: 50,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e5e9',
   },
   backButton: {
     padding: 5,
   },
-  backButtonText: {
-    color: '#fff',
-    fontSize: 16,
+  headerTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 15,
+    textAlign: 'center',
   },
   thumbnail: {
     width: '100%',
@@ -954,6 +1053,12 @@ const styles = StyleSheet.create({
   },
   topicIconContainer: {
     marginRight: 12,
+  },
+  appliedCouponText: {
+    fontSize: 12,
+    color: '#2575fc',
+    fontWeight: '600',
+    marginTop: 8,
   },
 });
 
