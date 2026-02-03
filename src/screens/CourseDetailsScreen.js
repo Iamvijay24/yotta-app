@@ -181,7 +181,10 @@ const CourseDetailsScreen = ({ navigation, route }) => {
         setCourseData(response);
       } catch (err) {
         console.error('Error fetching course data:', err);
-        setError(err.message || 'Failed to load course details');
+        // Don't set error if we get 502 but have fallback data
+        if (err.response?.status !== 502) {
+          setError(err.message || 'Failed to load course details');
+        }
       } finally {
         setLoading(false);
       }

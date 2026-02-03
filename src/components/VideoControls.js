@@ -165,7 +165,14 @@ export const VideoControls = ({
               activeOpacity={0.7}
             >
               {aiTutorLoading ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <ActivityIndicator
+                    size="small"
+                    color="#fff"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text style={styles.askAiButtonText}>ASK AI</Text>
+                </View>
               ) : (
                 <MaterialIcons name="send" size={12} color="#fff" />
               )}

@@ -9,6 +9,7 @@ import {
   Dimensions,
   ActivityIndicator,
   ScrollView,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Video from 'react-native-video';
@@ -17,6 +18,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAuth } from '../shared/api/AuthContext';
 import Slider from '@react-native-community/slider';
 import { VideoControls } from '../components/VideoControls';
+import { WebView } from 'react-native-webview';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -34,6 +36,9 @@ const VideoPlayerScreen = () => {
     currentTopicIndex = 0,
   } = route.params || {};
 
+  console.log(route.params);
+  console.log(currentTopicIndex);
+
   // Video player state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -45,6 +50,9 @@ const VideoPlayerScreen = () => {
   const [volume, setVolume] = useState(1.0);
   const [isMuted, setIsMuted] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
+  const [aiTutorLoading, setAiTutorLoading] = useState(false);
+  const [showAIWidget, setShowAIWidget] = useState(false);
+  const webViewRef = useRef(null);
 
   // Auto-hide controls timer
   const controlsTimerRef = useRef(null);
@@ -128,10 +136,22 @@ const VideoPlayerScreen = () => {
   );
 
   const handleAiTutor = useCallback(() => {
-    // TODO: Implement AI tutor functionality
-    Alert.alert('AI Tutor', 'AI tutor feature not implemented yet');
-    showControlsOnPress();
-  }, [showControlsOnPress]);
+    setIsPlaying(false); // Pause video when AI opens
+    setAiTutorLoading(true);
+    setShowAIWidget(true);
+  }, []);
+
+  const handleCloseAI = useCallback(() => {
+    // Send a message to the script to clean up if necessary
+    const closeScript = `
+      if (window.ai_tutor && typeof window.ai_tutor.destroy === 'function') {
+        window.ai_tutor.destroy();
+      }
+    `;
+    webViewRef.current?.injectJavaScript(closeScript);
+    setShowAIWidget(false);
+    setAiTutorLoading(false);
+  }, []);
 
   // Navigation handlers
   const goToPreviousTopic = useCallback(() => {
@@ -338,8 +358,8 @@ const VideoPlayerScreen = () => {
             onSkipForward={skipForward}
             onSkipBackward={skipBackward}
             onAiTutor={handleAiTutor}
-            aiTutorLoading={false}
-            hasAIAssistance={true} // Enable AI assistance
+            aiTutorLoading={aiTutorLoading}
+            hasAIAssistance={true}
             formatTime={formatTime}
             getQualityLabel={getQualityLabel}
             getPopupContainer={getPopupContainer}
@@ -472,11 +492,128 @@ const VideoPlayerScreen = () => {
           </View>
         </View>
       )}
+
+      {/* AI Widget Overlay */}
+      {showAIWidget && (
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            { zIndex: 9999, backgroundColor: '#000' },
+          ]}
+        >
+          <WebView
+            ref={webViewRef}
+            originWhitelist={['*']}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            thirdPartyCookiesEnabled={true}
+            databaseEnabled={true}
+            allowsInlineMediaPlayback={true}
+            mediaPlaybackRequiresUserAction={false}
+            mixedContentMode="always"
+            androidLayerType="hardware"
+            onMessage={event => {
+              const msg = event.nativeEvent.data;
+              console.log('AI_WIDGET_LOG:', msg);
+
+              if (msg === 'READY' || msg.startsWith('ERROR')) {
+                setAiTutorLoading(false);
+              }
+
+              // THE FIX: Ensure the entire view is unmounted immediately
+              if (msg === 'CLOSE_WIDGET') {
+                setShowAIWidget(false);
+                setAiTutorLoading(false);
+              }
+            }}
+            source={{
+              html: `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+              <style>
+                html, body { 
+                  margin: 0; padding: 0; 
+                  height: 100vh; width: 100vw; 
+                  background-color: #000; 
+                  overflow: hidden; 
+                }
+                #fb-widget-config { 
+                  width: 100% !important; 
+                  height: 100% !important; 
+                  position: absolute; top: 0; left: 0; 
+                }
+                /* Force the internal containers to fill the screen */
+                div[class*="widget-container"], .fb-avatar-container, [class*="MainContainer"] {
+                   width: 100% !important;
+                   height: 100% !important;
+                   max-width: none !important;
+                   border-radius: 0 !important;
+                }
+              </style>
+            </head>
+            <body>
+              <div id="fb-widget-config"></div>
+              <script src="https://d3cz62hdgxo8h8.cloudfront.net/ai_widget.latest.js"></script>
+              <script>
+                (function() {
+                  var check = setInterval(function() {
+                    if (window.ai_tutor) {
+                      clearInterval(check);
+                      window.ai_tutor.init(
+                        'fb-vibe-coding-lesson-${currentTopicIndex + 1}',
+                        '5118f0d9',
+                        'vibe-coding-lesson-${currentTopicIndex + 1}'
+                      ).then(function() {
+                        window.ai_tutor.open();
+                        
+                        // Signal Button that loading is done
+                        setTimeout(function() {
+                          window.ReactNativeWebView.postMessage('READY');
+                        }, 2000);
+
+                        // IMPROVED CLOSE DETECTION:
+                        // We listen for any click and check if the element is an 'X' or has 'close' in its class
+                        document.addEventListener('click', function(e) {
+                          var target = e.target;
+                          var isCloseButton = target.closest('[class*="close"]') || 
+                                              target.innerText === '×' || 
+                                              target.getAttribute('aria-label') === 'Close';
+                          
+                          if (isCloseButton) {
+                            window.ReactNativeWebView.postMessage('CLOSE_WIDGET');
+                          }
+                        });
+
+                      });
+                    }
+                  }, 500);
+                })();
+              </script>
+            </body>
+          </html>
+        `,
+              baseUrl: 'https://d3cz62hdgxo8h8.cloudfront.net/',
+            }}
+            style={{ flex: 1 }}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  aiContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+    backgroundColor: '#fff',
+    zIndex: 9999,
+  },
   container: {
     flex: 1,
     backgroundColor: '#000',
@@ -722,6 +859,30 @@ const styles = StyleSheet.create({
     color: '#2575fc',
     fontSize: 16,
     fontWeight: '600',
+  },
+  aiHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    paddingTop: 50,
+    backgroundColor: '#2575fc',
+  },
+  aiHeaderTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  aiCloseBtn: {
+    padding: 4,
+  },
+  aiWebView: {
+    flex: 1,
+  },
+  spinnerOverlay: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
   },
 });
 
