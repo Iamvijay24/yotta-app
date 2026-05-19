@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../shared/api/AuthContext';
-import LoginScreen from '../screens/LoginScreen';
+import {LoginScreen} from '../screens/auth';
 import CoursesListScreen from '../screens/CoursesListScreen';
 import MyProgressScreen from '../screens/MyProgressScreen';
 import AccountScreen from '../screens/AccountScreen';
