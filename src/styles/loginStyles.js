@@ -18,8 +18,8 @@ export const styles = StyleSheet.create({
   },
 
   logo: {
-    width: 180,
-    height: 60,
+    width: 280,
+    height: 160,
   },
 
   formContainer: {

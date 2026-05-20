@@ -1,24 +1,23 @@
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useAuth } from '../shared/api/AuthContext';
-import {LoginScreen} from '../screens/auth';
+import AccountScreen from '../screens/AccountScreen';
+import AuthScreen from '../screens/auth';
+import CourseDetailsScreen from '../screens/CourseDetailsScreen';
 import CoursesListScreen from '../screens/CoursesListScreen';
 import MyProgressScreen from '../screens/MyProgressScreen';
-import AccountScreen from '../screens/AccountScreen';
-import CourseDetailsScreen from '../screens/CourseDetailsScreen';
-import VideoPlayerScreen from '../screens/VideoPlayerScreen';
 import PaymentsScreen from '../screens/PaymentsScreen';
 import PaymentSuccessScreen from '../screens/PaymentSuccessScreen';
+import VideoPlayerScreen from '../screens/VideoPlayerScreen';
+import { useAuth } from '../shared/api/AuthContext';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const AuthNavigator = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="Login" component={LoginScreen} />
+    <Stack.Screen name="Login" component={AuthScreen} />
   </Stack.Navigator>
 );
 
