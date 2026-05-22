@@ -2,7 +2,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import AccountScreen from '../screens/AccountScreen';
 import AuthScreen from '../screens/auth';
 import CourseDetailsScreen from '../screens/CourseDetailsScreen';
 import MyProgressScreen from '../screens/MyProgressScreen';
@@ -11,6 +10,7 @@ import PaymentSuccessScreen from '../screens/PaymentSuccessScreen';
 import VideoPlayerScreen from '../screens/VideoPlayerScreen';
 import { useAuth } from '../shared/api/AuthContext';
 import CoursesListScreen from '../screens/courses-list';
+import AccountScreen from '../screens/account';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
