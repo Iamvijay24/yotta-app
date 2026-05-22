@@ -5,12 +5,12 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import AccountScreen from '../screens/AccountScreen';
 import AuthScreen from '../screens/auth';
 import CourseDetailsScreen from '../screens/CourseDetailsScreen';
-import CoursesListScreen from '../screens/CoursesListScreen';
 import MyProgressScreen from '../screens/MyProgressScreen';
 import PaymentsScreen from '../screens/PaymentsScreen';
 import PaymentSuccessScreen from '../screens/PaymentSuccessScreen';
 import VideoPlayerScreen from '../screens/VideoPlayerScreen';
 import { useAuth } from '../shared/api/AuthContext';
+import CoursesListScreen from '../screens/courses-list';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
