@@ -5,10 +5,8 @@ export const fetchAllCourses = createAsyncThunk(
   'dashboard/fetchAllCourses',
   async (_, { rejectWithValue }) => {
     try {
-      console.log('inside of the errorrr-------->>>>');
 
       const response = await DashboardAPI.getAllCourses();
-      console.log(response);
 
       if (Array.isArray(response)) return response;
       if (Array.isArray(response.courses)) return response.courses;

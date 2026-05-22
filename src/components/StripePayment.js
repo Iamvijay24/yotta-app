@@ -36,7 +36,6 @@ const StripePayment = ({
       };
 
       const response = await PaymentAPI.purchaseCourse(payload);
-      console.log('Payment response:', response);
 
       // Extract client secret from response
       let clientSecret = null;
@@ -54,7 +53,6 @@ const StripePayment = ({
         return;
       }
 
-      console.log('Using client secret:', clientSecret);
 
       // 2. Initialize the Payment Sheet
       const { error: initError } = await initPaymentSheet({
@@ -81,8 +79,6 @@ const StripePayment = ({
         );
         onCancel?.();
       } else {
-        // Payment successful - update enrolled courses and navigate to success screen
-        console.log('Payment successful, updating enrolled courses...');
 
         // Update enrolled courses state to show "Enrolled" status immediately
         dispatch(fetchEnrolledCourses());

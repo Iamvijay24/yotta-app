@@ -694,8 +694,6 @@ const CourseDetailsScreen = ({ navigation, route }) => {
               // Optionally navigate to course content or refresh enrolled courses
             }}
             onCancel={() => {
-              // Handle payment cancellation
-              console.log('Payment cancelled');
             }}
           />
         )}

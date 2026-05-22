@@ -5,9 +5,6 @@ import RefreshToken from '../shared/api/refreshToken';
 export async function makeApiRequest(method, endPoint, data) {
   const url = `https://u2u6ayshy6.execute-api.us-west-2.amazonaws.com/dev/${endPoint}`;
   const token = await AsyncStorage.getItem('@accessToken');
-  console.log(url);
-  console.log(token);
-  console.log(method, endPoint, data);
 
   try {
     const response = await axios({
@@ -21,7 +18,6 @@ export async function makeApiRequest(method, endPoint, data) {
       },
     });
 
-    console.log(response);
 
     if (response.status === 204) {
       return response.status;
@@ -29,7 +25,6 @@ export async function makeApiRequest(method, endPoint, data) {
 
     return response.data;
   } catch (error) {
-    console.log(error);
 
     const isUnauthorized =
       error.response?.status === 401 ||

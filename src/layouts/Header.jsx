@@ -108,7 +108,6 @@ const HeaderComponent = ({ toggleSidebar }) => {
 
   const handleSearch = (query) => {
     setSearchQuery(query);
-    console.log('Search query:', query);
   };
 
   const handleNotificationOpenChange = (open) => {

@@ -93,7 +93,6 @@ export const AuthProvider = ({ children }) => {
 
       cognitoUser.authenticateUser(authenticationDetails, {
         onSuccess: async result => {
-          console.log('Login successful:', result);
           const userData = {
             email: email,
             accessToken: result.getIdToken().getJwtToken(),
@@ -118,7 +117,6 @@ export const AuthProvider = ({ children }) => {
           reject(err);
         },
         newPasswordRequired: (userAttributes, requiredAttributes) => {
-          console.log('New password required for user:', userAttributes);
           reject(new Error('NEW_PASSWORD_REQUIRED'));
         },
       });
