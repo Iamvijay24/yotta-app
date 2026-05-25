@@ -6,7 +6,6 @@ export const fetchEnrolledCourses = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await EnrolledAPI.getEnrolledCourses();
-      console.log(response);
 
       if (response.status === 'success') {
         const courseIds = [...new Set(response.courses.map(c => c.course_id))];

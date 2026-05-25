@@ -26,11 +26,11 @@ const PaymentStatus = () => {
       setLoading(false);
       handleRedirect(status, courseId);
     }
-  }, []); 
+  }, []);
 
   const verifyPayment = async (courseId, sessionId, status) => {
     try {
-      await PaymentAPI.getCourseverified(courseId, sessionId);
+      await PaymentAPI.getCourseVerified(courseId, sessionId);
     } catch (error) {
       console.error("Error verifying payment:", error);
     } finally {

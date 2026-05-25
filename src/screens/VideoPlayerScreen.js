@@ -36,9 +36,6 @@ const VideoPlayerScreen = () => {
     currentTopicIndex = 0,
   } = route.params || {};
 
-  console.log(route.params);
-  console.log(currentTopicIndex);
-
   // Video player state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -514,7 +511,6 @@ const VideoPlayerScreen = () => {
             androidLayerType="hardware"
             onMessage={event => {
               const msg = event.nativeEvent.data;
-              console.log('AI_WIDGET_LOG:', msg);
 
               if (msg === 'READY' || msg.startsWith('ERROR')) {
                 setAiTutorLoading(false);
@@ -533,16 +529,16 @@ const VideoPlayerScreen = () => {
             <head>
               <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
               <style>
-                html, body { 
-                  margin: 0; padding: 0; 
-                  height: 100vh; width: 100vw; 
-                  background-color: #000; 
-                  overflow: hidden; 
+                html, body {
+                  margin: 0; padding: 0;
+                  height: 100vh; width: 100vw;
+                  background-color: #000;
+                  overflow: hidden;
                 }
-                #fb-widget-config { 
-                  width: 100% !important; 
-                  height: 100% !important; 
-                  position: absolute; top: 0; left: 0; 
+                #fb-widget-config {
+                  width: 100% !important;
+                  height: 100% !important;
+                  position: absolute; top: 0; left: 0;
                 }
                 /* Force the internal containers to fill the screen */
                 div[class*="widget-container"], .fb-avatar-container, [class*="MainContainer"] {
@@ -567,7 +563,7 @@ const VideoPlayerScreen = () => {
                         'vibe-coding-lesson-${currentTopicIndex + 1}'
                       ).then(function() {
                         window.ai_tutor.open();
-                        
+
                         // Signal Button that loading is done
                         setTimeout(function() {
                           window.ReactNativeWebView.postMessage('READY');
@@ -577,10 +573,10 @@ const VideoPlayerScreen = () => {
                         // We listen for any click and check if the element is an 'X' or has 'close' in its class
                         document.addEventListener('click', function(e) {
                           var target = e.target;
-                          var isCloseButton = target.closest('[class*="close"]') || 
-                                              target.innerText === '×' || 
+                          var isCloseButton = target.closest('[class*="close"]') ||
+                                              target.innerText === '×' ||
                                               target.getAttribute('aria-label') === 'Close';
-                          
+
                           if (isCloseButton) {
                             window.ReactNativeWebView.postMessage('CLOSE_WIDGET');
                           }

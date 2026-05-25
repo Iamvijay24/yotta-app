@@ -6,7 +6,7 @@ export const PaymentAPI = {
     return makeApiRequest('POST', 'payment', data);
   },
 
-  getCourseverified(courseId, sessionId) {
+  getCourseVerified(courseId, sessionId) {
     return makeApiRequest('GET', `payment/${courseId}/${sessionId}`);
   },
 };
