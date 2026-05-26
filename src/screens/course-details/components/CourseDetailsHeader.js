@@ -6,7 +6,14 @@ const CourseDetailsHeader = ({ title, onBack, styles }) => (
     <TouchableOpacity style={styles.backButton} onPress={onBack}>
       <Icon name="arrow-back" size={24} color="#666" />
     </TouchableOpacity>
-    <Text style={styles.headerTitle}>{title}</Text>
+
+    <Text
+      style={styles.headerTitle}
+      numberOfLines={1}
+      ellipsizeMode="tail"
+    >
+      {title}
+    </Text>
   </View>
 );
 
