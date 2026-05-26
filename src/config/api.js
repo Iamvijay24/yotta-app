@@ -1,6 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RefreshToken from '../shared/api/refreshToken';
+import { ENV } from './env';
 
 export async function makeApiRequest(method, endPoint, data) {
   const url = `https://u2u6ayshy6.execute-api.us-west-2.amazonaws.com/dev/${endPoint}`;
@@ -18,14 +19,12 @@ export async function makeApiRequest(method, endPoint, data) {
       },
     });
 
-
     if (response.status === 204) {
       return response.status;
     }
 
     return response.data;
   } catch (error) {
-
     const isUnauthorized =
       error.response?.status === 401 ||
       error.message === 'Unauthorized' ||
