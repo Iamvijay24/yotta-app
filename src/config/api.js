@@ -4,13 +4,7 @@ import RefreshToken from '../shared/api/refreshToken';
 import { ENV } from './env';
 
 export async function makeApiRequest(method, endPoint, data) {
-  const sanitizedBaseUrl = ENV.API_BASE_URL.endsWith('/')
-    ? ENV.API_BASE_URL
-    : `${ENV.API_BASE_URL}/`;
-  const sanitizedEndpoint = endPoint.startsWith('/')
-    ? endPoint.slice(1)
-    : endPoint;
-  const url = `${sanitizedBaseUrl}${sanitizedEndpoint}`;
+  const url = `https://u2u6ayshy6.execute-api.us-west-2.amazonaws.com/dev/${endPoint}`;
   const token = await AsyncStorage.getItem('@accessToken');
 
   try {
