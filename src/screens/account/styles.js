@@ -7,7 +7,7 @@ export const styles = StyleSheet.create({
     backgroundColor: '#2575fc',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    paddingTop: 50,
+    // paddingTop: 50,
   },
   headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
   profileSection: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 10 },

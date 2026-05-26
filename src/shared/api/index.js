@@ -1,11 +1,12 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import refreshToken from './refreshToken.js'; // Your AWS Cognito refresh logic
+import { ENV } from '../../config/env';
 
 export { AuthProvider, useAuth } from './AuthContext.jsx';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://u2u6ayshy6.execute-api.us-west-2.amazonaws.com/dev/',
+  baseURL: ENV.API_BASE_URL,
   // timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
