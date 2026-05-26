@@ -18,6 +18,7 @@ import { useAuth } from '../shared/api/AuthContext';
 import { PaymentAPI } from '../services/payment.services';
 import { DashboardAPI } from '../services/dashboard.services';
 import StripePayment from '../components/StripePayment';
+import LoadSpinner from '../components/LoadSpinner';
 import course_overview from '../components/data/course_overview';
 
 const CourseDetailsScreen = ({ navigation, route }) => {
@@ -365,7 +366,8 @@ const CourseDetailsScreen = ({ navigation, route }) => {
           </Text>
         </View>
         <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading course details...</Text>
+          <LoadSpinner />
+     
         </View>
       </SafeAreaView>
     );
