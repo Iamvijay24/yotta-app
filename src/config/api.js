@@ -1,9 +1,16 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RefreshToken from '../shared/api/refreshToken';
+import { ENV } from './env';
 
 export async function makeApiRequest(method, endPoint, data) {
-  const url = `https://u2u6ayshy6.execute-api.us-west-2.amazonaws.com/dev/${endPoint}`;
+  const sanitizedBaseUrl = ENV.API_BASE_URL.endsWith('/')
+    ? ENV.API_BASE_URL
+    : `${ENV.API_BASE_URL}/`;
+  const sanitizedEndpoint = endPoint.startsWith('/')
+    ? endPoint.slice(1)
+    : endPoint;
+  const url = `${sanitizedBaseUrl}${sanitizedEndpoint}`;
   const token = await AsyncStorage.getItem('@accessToken');
 
   try {
@@ -18,14 +25,12 @@ export async function makeApiRequest(method, endPoint, data) {
       },
     });
 
-
     if (response.status === 204) {
       return response.status;
     }
 
     return response.data;
   } catch (error) {
-
     const isUnauthorized =
       error.response?.status === 401 ||
       error.message === 'Unauthorized' ||
