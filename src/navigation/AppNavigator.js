@@ -3,14 +3,14 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AuthScreen from '../screens/auth';
-import CourseDetailsScreen from '../screens/CourseDetailsScreen';
 import MyProgressScreen from '../screens/MyProgressScreen';
 import PaymentsScreen from '../screens/PaymentsScreen';
 import PaymentSuccessScreen from '../screens/PaymentSuccessScreen';
-import VideoPlayerScreen from '../screens/VideoPlayerScreen';
 import { useAuth } from '../shared/api/AuthContext';
 import CoursesListScreen from '../screens/courses-list';
 import AccountScreen from '../screens/account';
+import CourseDetailsScreen from '../screens/course-details';
+import VideoPlayerScreen from '../screens/video-player';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
