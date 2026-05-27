@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -33,6 +33,10 @@ const CourseDetailsScreen = ({ navigation, route }) => {
   const { course, isEnrolled = false } = route.params || {};
   const { user, isAuthenticated } = useAuth();
 
+  // Hooks must be called unconditionally, before any early returns
+  const unmountedRef = useRef(false);
+  const [enrollLoading, setEnrollLoading] = useState(false);
+
   // Early return if no course data
   if (!course) {
     return (
@@ -42,7 +46,6 @@ const CourseDetailsScreen = ({ navigation, route }) => {
       </SafeAreaView>
     );
   }
-  const [enrollLoading, setEnrollLoading] = useState(false);
   const [expandedLessons, setExpandedLessons] = useState(new Set());
   const [courseData, setCourseData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -159,6 +162,13 @@ const CourseDetailsScreen = ({ navigation, route }) => {
     return rawStructure;
   }, [courseData, error, course]);
 
+  // Mark unmounted on cleanup
+  useEffect(() => {
+    return () => {
+      unmountedRef.current = true;
+    };
+  }, []);
+
   // Fetch course structure on component mount
   useEffect(() => {
     const fetchCourseData = async () => {
@@ -167,14 +177,17 @@ const CourseDetailsScreen = ({ navigation, route }) => {
         setError(null);
         const courseId = course.course_id || course.id;
         const response = await DashboardAPI.getCourseStructure(courseId);
+        if (unmountedRef.current) return;
         setCourseData(response);
       } catch (err) {
         console.error('Error fetching course data:', err);
         // Don't set error if we get 502 but have fallback data
         if (err.response?.status !== 502) {
+          if (unmountedRef.current) return;
           setError(err.message || 'Failed to load course details');
         }
       } finally {
+        if (unmountedRef.current) return;
         setLoading(false);
       }
     };
@@ -186,6 +199,7 @@ const CourseDetailsScreen = ({ navigation, route }) => {
 
   // Calculate durations when course data changes
   useEffect(() => {
+    if (unmountedRef.current) return;
     if (resolvedCourseData?.structure) {
       const durationsMap = {};
       let totalSeconds = 0;

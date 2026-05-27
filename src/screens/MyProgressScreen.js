@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import LoadSpinner from '../components/LoadSpinner';
 const MyProgressScreen = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const unmountedRef = useRef(false);
   const [refreshing, setRefreshing] = useState(false);
   const [progressMap, setProgressMap] = useState({});
 
@@ -58,12 +59,20 @@ const MyProgressScreen = () => {
     }
   }, [dispatch, enrolledStatus]);
 
+  // Mark unmounted on cleanup
+  useEffect(() => {
+    return () => {
+      unmountedRef.current = true;
+    };
+  }, []);
+
   // Fetch courses progress
   useEffect(() => {
     const fetchProgress = async () => {
       if (enrolledStatus !== 'succeeded') return;
       try {
         const response = await TrackingAPI.getAllCourseProgress();
+        if (unmountedRef.current) return;
         if (response?.courses) {
           const progressData = {};
           response.courses.forEach(course => {
@@ -73,6 +82,7 @@ const MyProgressScreen = () => {
               total: course.total_topics || 0,
             };
           });
+          if (unmountedRef.current) return;
           setProgressMap(progressData);
         }
       } catch (err) {

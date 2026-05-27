@@ -16,6 +16,7 @@ const PaymentStatus = () => {
 
   const [loading, setLoading] = useState(true);
   const hasVerified = useRef(false);
+  const unmountedRef = useRef(false);
   const redirectTimeoutRef = useRef(null);
 
   // Refs to capture current values for the setTimeout callback,
@@ -58,6 +59,8 @@ const PaymentStatus = () => {
       } catch (error) {
         console.error('Error verifying payment:', error);
       } finally {
+        // Prevent state updates / redirects after unmount
+        if (unmountedRef.current) return;
         setLoading(false);
         handleRedirect();
       }
@@ -65,10 +68,11 @@ const PaymentStatus = () => {
     [handleRedirect],
   );
 
-  // Clean up the pending redirect timeout on unmount to prevent
-  // stale navigations to unmounted components
+  // Mark the component as unmounted on cleanup, allowing pending
+  // async operations (verifyPayment) to bail out early.
   useEffect(() => {
     return () => {
+      unmountedRef.current = true;
       if (redirectTimeoutRef.current) {
         clearTimeout(redirectTimeoutRef.current);
       }
@@ -86,6 +90,8 @@ const PaymentStatus = () => {
       // Clean up payment session IDs from storage after reading
       await AsyncStorage.removeItem('session_id');
       await AsyncStorage.removeItem('course_id');
+
+      if (unmountedRef.current) return;
 
       if (storedSession && storedCourse) {
         verifyPayment(storedCourse, storedSession);
