@@ -27,6 +27,11 @@ const VideoPlayerScreen = () => {
   const videoRef = useRef(null);
   const webViewRef = useRef(null);
   const controlsTimerRef = useRef(null);
+  const seekingRef = useRef(false);
+  const seekCooldownRef = useRef(null);
+  // Stores the single most recent seek target while a seek is in-flight.
+  // Cleared once the cooldown expires, allowing the next seek to fire.
+  const pendingSeekRef = useRef(null);
 
   const {
     course,
@@ -88,12 +93,40 @@ const VideoPlayerScreen = () => {
     showControlsOnPress();
   }, [showControlsOnPress]);
 
+  const performSeek = useCallback(time => {
+    // Clear any previous cooldown
+    if (seekCooldownRef.current) {
+      clearTimeout(seekCooldownRef.current);
+    }
+
+    // If a seek is already in-flight, update the pending target position
+    if (seekingRef.current) {
+      pendingSeekRef.current = time;
+      return;
+    }
+
+    seekingRef.current = true;
+    pendingSeekRef.current = null;
+    videoRef.current?.seek(time);
+
+    // After a cooldown, release the lock. If another seek was queued
+    // during the cooldown, it will fire now.
+    seekCooldownRef.current = setTimeout(() => {
+      seekingRef.current = false;
+      const nextTarget = pendingSeekRef.current;
+      pendingSeekRef.current = null;
+      if (nextTarget !== null) {
+        performSeek(nextTarget);
+      }
+    }, 300);
+  }, []);
+
   const onSeek = useCallback(
     value => {
-      videoRef.current?.seek((value / 100) * duration);
+      performSeek((value / 100) * duration);
       showControlsOnPress();
     },
-    [duration, showControlsOnPress],
+    [duration, showControlsOnPress, performSeek],
   );
 
   const toggleMute = useCallback(() => {
@@ -103,15 +136,15 @@ const VideoPlayerScreen = () => {
 
   const skipForward = useCallback(() => {
     const newTime = Math.min(currentTime + 10, duration);
-    videoRef.current?.seek(newTime);
+    performSeek(newTime);
     showControlsOnPress();
-  }, [currentTime, duration, showControlsOnPress]);
+  }, [currentTime, duration, showControlsOnPress, performSeek]);
 
   const skipBackward = useCallback(() => {
     const newTime = Math.max(currentTime - 10, 0);
-    videoRef.current?.seek(newTime);
+    performSeek(newTime);
     showControlsOnPress();
-  }, [currentTime, showControlsOnPress]);
+  }, [currentTime, showControlsOnPress, performSeek]);
 
   const handleSpeedChange = useCallback(
     speed => {
@@ -192,6 +225,9 @@ const VideoPlayerScreen = () => {
     return () => {
       if (controlsTimerRef.current) {
         clearTimeout(controlsTimerRef.current);
+      }
+      if (seekCooldownRef.current) {
+        clearTimeout(seekCooldownRef.current);
       }
     };
   }, []);
