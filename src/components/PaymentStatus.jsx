@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Result, Spin } from 'antd';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,18 +16,40 @@ const PaymentStatus = () => {
 
   const [loading, setLoading] = useState(true);
   const hasVerified = useRef(false);
+  const redirectTimeoutRef = useRef(null);
+
+  // Refs to capture current values for the setTimeout callback,
+  // preventing stale closure over status, courseId, and navigate.
+  const statusRef = useRef(status);
+  const courseIdRef = useRef(courseId);
+  const navigateRef = useRef(navigate);
+
+  // Keep refs in sync with the latest values on each render.
+  statusRef.current = status;
+  courseIdRef.current = courseId;
+  navigateRef.current = navigate;
 
   const handleRedirect = useCallback(() => {
-    setTimeout(() => {
-      if (status === 'success') {
-        navigate(`/courses/${courseId}/play`);
-      } else if (status === 'failed') {
-        navigate(`/courses/${courseId}`);
+    // Clear any previously scheduled redirect
+    if (redirectTimeoutRef.current) {
+      clearTimeout(redirectTimeoutRef.current);
+    }
+
+    redirectTimeoutRef.current = setTimeout(() => {
+      // Read from refs to always get the latest values
+      const currentStatus = statusRef.current;
+      const currentCourseId = courseIdRef.current;
+      const currentNavigate = navigateRef.current;
+
+      if (currentStatus === 'success') {
+        currentNavigate(`/courses/${currentCourseId}/play`);
+      } else if (currentStatus === 'failed') {
+        currentNavigate(`/courses/${currentCourseId}`);
       } else {
-        navigate('/courses');
+        currentNavigate('/courses');
       }
     }, 3000);
-  }, [courseId, navigate, status]);
+  }, []); // No dependencies needed — we read from refs inside the callback
 
   const verifyPayment = useCallback(
     async (verifiedCourseId, sessionId) => {
@@ -42,6 +64,16 @@ const PaymentStatus = () => {
     },
     [handleRedirect],
   );
+
+  // Clean up the pending redirect timeout on unmount to prevent
+  // stale navigations to unmounted components
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (hasVerified.current) return;
