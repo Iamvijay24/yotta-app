@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Result, Spin } from 'antd';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,9 +7,12 @@ import { PaymentAPI } from '../services/payment.services';
 const PaymentStatus = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const status = queryParams.get('status');
-  const courseId = queryParams.get('courseId');
+  const queryParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search],
+  );
+  const status = useMemo(() => queryParams.get('status'), [queryParams]);
+  const courseId = useMemo(() => queryParams.get('courseId'), [queryParams]);
 
   const [loading, setLoading] = useState(true);
   const hasVerified = useRef(false);
