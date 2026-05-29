@@ -1,4 +1,64 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# YottaacademyApp
+
+This is a [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+
+## Environment & Secrets Security
+
+All runtime configuration is now loaded from environment variables (via `@env`) and validated at app startup.
+
+### Environment files
+
+- `.env.example` - template (safe to commit)
+- `.env.development`
+- `.env.staging`
+- `.env.production`
+- `.env` - local active env file (gitignored)
+
+Create `.env` from one of the templates before running the app:
+
+```sh
+cp .env.development .env
+```
+
+### Required variables
+
+- `APP_ENV`
+- `API_BASE_URL`
+- `FIREBASE_API_KEY`
+- `FIREBASE_AUTH_DOMAIN`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_STORAGE_BUCKET`
+- `FIREBASE_MESSAGING_SENDER_ID`
+- `FIREBASE_APP_ID`
+- `AWS_REGION`
+- `AWS_USER_POOL_ID`
+- `AWS_USER_POOL_CLIENT_ID`
+- `STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_MERCHANT_IDENTIFIER`
+
+If required values are missing or malformed, app startup fails fast through `validateEnvironment()` in `App.js`.
+
+### Credential rotation (required)
+
+Because credentials were previously exposed in source code, rotate them immediately:
+
+1. **Firebase**
+   - Regenerate Web API key in Firebase/Google Cloud Console.
+   - Review Firebase app restrictions, allowed origins, and API restrictions.
+   - Replace values in your environment files.
+
+2. **AWS Cognito**
+   - Create a new app client (or rotate existing client configuration) in the Cognito User Pool.
+   - Update `AWS_USER_POOL_CLIENT_ID` and verify `AWS_USER_POOL_ID` and region.
+   - Invalidate or decommission old client settings where possible.
+
+3. **API Gateway / backend**
+   - Rotate any backend keys/tokens tied to the old mobile/web client config.
+   - Confirm `API_BASE_URL` points to the correct stage (`dev/staging/prod`).
+
+4. **Post-rotation verification**
+   - Restart Metro and rebuild apps after updating `.env`.
+   - Verify login, token refresh, and API calls work correctly.
 
 # Getting Started
 
