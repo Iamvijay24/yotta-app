@@ -34,33 +34,33 @@ const AccountScreen = () => {
     {
       id: '1',
       title: 'Edit Profile',
-      icon: '👤',
+      icon: 'edit',
       action: () =>
         Alert.alert('Coming Soon', 'Edit profile feature coming soon!'),
     },
     {
       id: '2',
       title: 'Notifications',
-      icon: '🔔',
+      icon: 'bells',
       action: () =>
         Alert.alert('Coming Soon', 'Notification settings coming soon!'),
     },
     {
       id: '3',
       title: 'Privacy & Security',
-      icon: '🔒',
+      icon: 'safety',
       action: () => Alert.alert('Coming Soon', 'Privacy settings coming soon!'),
     },
     {
       id: '4',
       title: 'Help & Support',
-      icon: '❓',
+      icon: 'questioncircle',
       action: () => Alert.alert('Coming Soon', 'Help & support coming soon!'),
     },
     {
       id: '5',
       title: 'About',
-      icon: 'ℹ️',
+      icon: 'infocirlce',
       action: () => Alert.alert('About', 'Yotta Academy v1.0.0'),
     },
   ];
@@ -68,11 +68,12 @@ const AccountScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
+      <AccountHeader />
       <ScrollView
         style={styles.scrollContainer}
+        contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <AccountHeader />
         <ProfileCard user={user} />
         <AccountMenu items={menuItems} />
         <LogoutSection onLogout={handleLogout} />
